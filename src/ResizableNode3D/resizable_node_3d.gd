@@ -61,10 +61,12 @@ func _notification(what: int) -> void:
 
 				if Engine.is_editor_hint() and not _scale_notification_cooldown:
 					_scale_notification_cooldown = true
-					EditorInterface.get_editor_toaster().push_toast(
-						_get_scale_warning_text(),
-						EditorToaster.SEVERITY_WARNING
-					)
+					if (EditorInterface as Object).has_method("get_editor_toaster"):
+						var toaster: Object = (EditorInterface as Object).call("get_editor_toaster")
+						if toaster:
+							toaster.call("push_toast", _get_scale_warning_text(), 1)
+					else:
+						push_warning(_get_scale_warning_text())
 					get_tree().create_timer(1.0).timeout.connect(func() -> void:
 						_scale_notification_cooldown = false
 					)
@@ -76,18 +78,20 @@ func _get_scale_warning_text() -> String:
 func _enter_tree() -> void:
 	if not Engine.is_editor_hint():
 		return
-	if not EditorInterface.transform_requested.is_connected(_transform_requested):
-		EditorInterface.transform_requested.connect(_transform_requested)
-	if not EditorInterface.transform_commited.is_connected(_transform_commited):
-		EditorInterface.transform_commited.connect(_transform_commited)
+	var editor: Object = EditorInterface
+	if editor.has_signal("transform_requested") and not editor.is_connected("transform_requested", _transform_requested):
+		editor.connect("transform_requested", _transform_requested)
+	if editor.has_signal("transform_commited") and not editor.is_connected("transform_commited", _transform_commited):
+		editor.connect("transform_commited", _transform_commited)
 
 func _exit_tree() -> void:
 	if not Engine.is_editor_hint():
 		return
-	if EditorInterface.transform_requested.is_connected(_transform_requested):
-		EditorInterface.transform_requested.disconnect(_transform_requested)
-	if EditorInterface.transform_commited.is_connected(_transform_commited):
-		EditorInterface.transform_commited.disconnect(_transform_commited)
+	var editor: Object = EditorInterface
+	if editor.has_signal("transform_requested") and editor.is_connected("transform_requested", _transform_requested):
+		editor.disconnect("transform_requested", _transform_requested)
+	if editor.has_signal("transform_commited") and editor.is_connected("transform_commited", _transform_commited):
+		editor.disconnect("transform_commited", _transform_commited)
 
 func _transform_requested(data: Dictionary) -> void:
 	if not EditorInterface.get_selection().get_selected_nodes().has(self):

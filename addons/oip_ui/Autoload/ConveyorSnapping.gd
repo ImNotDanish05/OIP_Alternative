@@ -84,14 +84,21 @@ static func snap_selected_conveyors() -> void:
 
 	var selection := EditorInterface.get_selection()
 	var selected_conveyors: Array[Node3D] = []
-	var target_conveyor := EditorInterface.get_active_node_3d()
+	var target_conveyor: Node3D = null
+	var editor: Object = EditorInterface
+	if editor.has_method("get_active_node_3d"):
+		target_conveyor = editor.call("get_active_node_3d") as Node3D
+	if not target_conveyor:
+		var sel_nodes := selection.get_selected_nodes()
+		if not sel_nodes.is_empty() and sel_nodes.back() is Node3D:
+			target_conveyor = sel_nodes.back() as Node3D
 	
 	if not target_conveyor:
-		EditorInterface.get_editor_toaster().push_toast("No active node found - please click on a target conveyor first", EditorToaster.SEVERITY_WARNING)
+		_show_toast("No active node found - please click on a target conveyor first")
 		return
 	
 	if not _is_conveyor(target_conveyor):
-		EditorInterface.get_editor_toaster().push_toast("Active node is not a conveyor - please select a conveyor as target", EditorToaster.SEVERITY_WARNING)
+		_show_toast("Active node is not a conveyor - please select a conveyor as target")
 		return
 	
 	for node in selection.get_selected_nodes():
@@ -99,13 +106,13 @@ static func snap_selected_conveyors() -> void:
 			selected_conveyors.append(node as Node3D)
 
 	if selected_conveyors.is_empty():
-		EditorInterface.get_editor_toaster().push_toast("No valid conveyors selected for snapping (target conveyor excluded)", EditorToaster.SEVERITY_WARNING)
+		_show_toast("No valid conveyors selected for snapping (target conveyor excluded)")
 		return
 
 	for node in selected_conveyors:
 		if (_is_chain_transfer(node) or _is_blade_stop(node)) and not _is_roller_conveyor(target_conveyor):
 			var label := "Chain transfers" if _is_chain_transfer(node) else "Blade stops"
-			EditorInterface.get_editor_toaster().push_toast("%s can only be snapped onto a roller conveyor" % label, EditorToaster.SEVERITY_WARNING)
+			_show_toast("%s can only be snapped onto a roller conveyor" % label)
 			return
 	
 	var undo_redo := EditorInterface.get_editor_undo_redo()
@@ -1368,3 +1375,13 @@ static func _world_pos_near_side_plane(point: Vector3, node: Node3D, side_port: 
 	var local_x: float = (xform.affine_inverse() * point).x
 	var x_bounds: Vector2 = _get_conveyor_x_bounds(node)
 	return local_x >= x_bounds.x - tolerance and local_x <= x_bounds.y + tolerance
+
+
+static func _show_toast(msg: String) -> void:
+	var editor: Object = EditorInterface
+	if editor and editor.has_method("get_editor_toaster"):
+		var toaster: Object = editor.call("get_editor_toaster")
+		if toaster:
+			toaster.call("push_toast", msg, 1)
+			return
+	push_warning(msg)

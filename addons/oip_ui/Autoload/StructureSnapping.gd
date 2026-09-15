@@ -28,9 +28,7 @@ func snap_selected_structures() -> void:
 	var selected_nodes := selection.get_selected_nodes()
 
 	if selected_nodes.size() < 2:
-		EditorInterface.get_editor_toaster().push_toast(
-			"Select two structures to snap (Platform+Stairs, Platform+Platform, Platform+GuardRail).",
-			EditorToaster.SEVERITY_WARNING)
+		_show_toast("Select two structures to snap (Platform+Stairs, Platform+Platform, Platform+GuardRail).")
 		return
 
 	var platforms: Array[Platform] = []
@@ -59,9 +57,17 @@ func snap_selected_structures() -> void:
 	elif markings.size() >= 2:
 		_snap_marking_to_marking(markings[0], markings[1])
 	else:
-		EditorInterface.get_editor_toaster().push_toast(
-			"Select Platform+Stairs, Platform+Barrier, Barrier+Barrier, Platform+Platform, or Marking+Marking.",
-			EditorToaster.SEVERITY_WARNING)
+		_show_toast("Select Platform+Stairs, Platform+Barrier, Barrier+Barrier, Platform+Platform, or Marking+Marking.")
+
+
+static func _show_toast(msg: String) -> void:
+	var editor: Object = EditorInterface
+	if editor and editor.has_method("get_editor_toaster"):
+		var toaster: Object = editor.call("get_editor_toaster")
+		if toaster:
+			toaster.call("push_toast", msg, 1)
+			return
+	push_warning(msg)
 
 
 static func find_snap_to_specific_platform(selected: Node3D, target: Platform, intent: Transform3D) -> Dictionary:

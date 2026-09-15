@@ -16,7 +16,10 @@ var _live_snap_shortcut: Shortcut
 
 func _enter_tree() -> void:
 	_editor_node = get_tree().root.get_child(0)
-	_editor_node.editor_layout_loaded.connect(_editor_layout_loaded)
+	if _editor_node and _editor_node.has_signal("editor_layout_loaded"):
+		_editor_node.connect("editor_layout_loaded", _editor_layout_loaded)
+	else:
+		_editor_layout_loaded.call_deferred()
 
 	var editor_settings := EditorInterface.get_editor_settings()
 	var use_shortcut := Shortcut.new()
@@ -64,7 +67,8 @@ func _editor_layout_loaded() -> void:
 
 	if get_tree().edited_scene_root == null:
 		_create_new_simulation()
-		EditorInterface.mark_scene_as_saved()
+		if (EditorInterface as Object).has_method("mark_scene_as_saved"):
+			(EditorInterface as Object).call("mark_scene_as_saved")
 
 
 func _process(_delta: float) -> void:
@@ -123,10 +127,15 @@ func _create_new_simulation() -> void:
 	var scene := Node3D.new()
 	scene.name = "Simulation"
 	var building: Node3D = load("res://parts/Building.tscn").instantiate()
-	EditorInterface.add_root_node(scene)
-	get_tree().edited_scene_root.add_child(building)
-	building.owner = scene
+	if (EditorInterface as Object).has_method("add_root_node"):
+		(EditorInterface as Object).call("add_root_node", scene)
+	elif get_tree().edited_scene_root:
+		get_tree().edited_scene_root.add_child(scene)
+	if get_tree().edited_scene_root:
+		get_tree().edited_scene_root.add_child(building)
+		building.owner = scene
 
 
 func _remove_new_simulation() -> void:
-	EditorInterface.remove_root_node()
+	if (EditorInterface as Object).has_method("remove_root_node"):
+		(EditorInterface as Object).call("remove_root_node")
