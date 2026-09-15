@@ -16,3 +16,9 @@ oip_data/
 
 #Other
 .vs/
+
+# Exported application builds and packfiles
+build_app_*
+*.pck
+*.x86_64
+/libOIP-COMMS*.so
