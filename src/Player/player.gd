@@ -75,8 +75,8 @@ func _ensure_input_map() -> void:
 	_ensure_action_with_keys("move_right", [KEY_D, KEY_RIGHT] as Array[Key])
 	_ensure_action_with_keys("right", [KEY_D] as Array[Key])
 	_ensure_action_with_keys("jump", [KEY_SPACE] as Array[Key])
-	_ensure_action_with_physical_key("sprint", KEY_SHIFT)
-	_ensure_action_with_keys("pilot_sprint", [KEY_SHIFT] as Array[Key])
+	_ensure_action_with_physical_key("sprint", KEY_CTRL)
+	_ensure_action_with_keys("pilot_sprint", [KEY_CTRL] as Array[Key])
 
 
 func _ensure_action_with_keys(action: String, keys: Array[Key]) -> void:
@@ -166,7 +166,7 @@ func _physics_process(delta: float) -> void:
 	if input_dir.length_squared() > 1.0:
 		input_dir = input_dir.normalized()
 
-	var is_sprinting: bool = Input.is_action_pressed("sprint") or Input.is_action_pressed("pilot_sprint") or Input.is_physical_key_pressed(KEY_SHIFT)
+	var is_sprinting: bool = Input.is_action_pressed("sprint") or Input.is_action_pressed("pilot_sprint") or Input.is_physical_key_pressed(KEY_CTRL)
 	var current_speed: float = sprint_speed if is_sprinting else walk_speed
 
 	var forward: Vector3 = -_head.global_transform.basis.z

@@ -28,7 +28,7 @@ class_name AMSGCapsuleController
 var _previous_rotation_mode: int = 0
 var _direction: Vector3 = Vector3.ZERO
 var _view_changed_recently: bool = false
-var _camera_cycle_index: int = 2 # start at third shoulder to match Player.tscn (third, right)
+var _camera_cycle_index: int = 0 # start at 0 (First Person)
 var _last_jump_press_time: float = -10.0
 var _double_tap_threshold: float = 0.35
 var _fly_toggle_block_until_release: bool = false
@@ -68,11 +68,15 @@ func _ready() -> void:
 		light_off_sound = load("res://AMSG_Examples/Player/flashlight/light_off.wav") as AudioStream
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	# Ensure camera is current
-	if camera_component and camera_component.Camera:
-		camera_component.Camera.current = true
+	# Ensure camera is current and set to First Person initially
+	if camera_component:
+		if camera_component.Camera:
+			camera_component.Camera.current = true
+		camera_component.view_mode = Global.view_mode.first_person
+		camera_component.view_angle = Global.view_angle.head
+	_camera_cycle_index = 0
 	_previous_rotation_mode = character_component.rotation_mode if character_component else 0
-	print("AMSG Player ready. Footstep sounds loaded: ", footstep_sounds.size(), ", Flashlight: ", (flashlight != null))
+	print("AMSG Player ready. View: First Person. Footstep sounds loaded: ", footstep_sounds.size(), ", Flashlight: ", (flashlight != null))
 
 func _physics_process(delta: float) -> void:
 	if Engine.is_editor_hint() or character_component == null or camera_component == null:
@@ -133,16 +137,21 @@ func _physics_process(delta: float) -> void:
 				h_input = h_input.normalized()
 			var h_dir: Vector3 = h_input.rotated(Vector3.UP, h_rotation)
 
-			# Ctrl is PURE SPEED 10 FOR WASD - NEVER changes altitude or downward speed!
-			var is_ctrl_fast: bool = Input.is_action_pressed("crouch") or Input.is_physical_key_pressed(KEY_CTRL)
-			var h_speed: float = fly_fast_speed if is_ctrl_fast else fly_speed
+			# Ctrl (sprint): pure horizontal speed boost (speed 10) - NEVER alters altitude
+			var is_fast: bool = Input.is_action_pressed("sprint") or Input.is_physical_key_pressed(KEY_CTRL)
+			var h_speed: float = fly_fast_speed if is_fast else fly_speed
 
-			# Vertical movement: ONLY Space (+up) and Shift (-down). Ctrl NEVER touches this!
+			# Vertical movement: Space (+up) and Shift (-down). Ctrl NEVER touches this!
 			var v_speed: float = 0.0
 			if Input.is_action_pressed("jump") or Input.is_physical_key_pressed(KEY_SPACE):
 				v_speed += fly_vertical_speed
-			if Input.is_action_pressed("sprint") or Input.is_physical_key_pressed(KEY_SHIFT):
+			# Fly down with Shift (crouch key)
+			if Input.is_action_pressed("crouch") or Input.is_physical_key_pressed(KEY_SHIFT):
 				v_speed -= fly_vertical_speed
+
+			# Absolute safeguard: if Ctrl/sprint is held, downward flight is strictly blocked!
+			if is_fast and v_speed < 0.0:
+				v_speed = 0.0
 
 			# Assign velocity directly:
 			# Y is strictly v_speed (0.0 if neither Space nor Shift is held!)
@@ -187,6 +196,10 @@ func _physics_process(delta: float) -> void:
 		else:
 			if Input.is_action_just_pressed("crouch"):
 				character_component.stance = Global.stance.standing if character_component.stance == Global.stance.crouching else Global.stance.crouching
+	else:
+		# Guarantee standing stance while flying so camera and collision NEVER crouch or drop
+		if character_component.stance != Global.stance.standing:
+			character_component.stance = Global.stance.standing
 
 	# Sprint - disabled when flying (Shift is used for down, Ctrl is 2x speed)
 	if not is_flying:

@@ -32,7 +32,7 @@ var CameraHOffset := 0.0
 					update_camera_offset()
 
 			
-@export var view_mode : Global.view_mode = Global.view_mode.third_person :
+@export var view_mode : Global.view_mode = Global.view_mode.first_person :
 	get: return view_mode
 	set(Newview_mode):
 		view_mode = Newview_mode
@@ -47,7 +47,7 @@ var CameraHOffset := 0.0
 					SpringArm.spring_length = -0.4
 					VObject = Camera
 				Global.view_mode.third_person:
-					SpringArm.spring_length = 1.75
+					SpringArm.spring_length = 3.5
 					VObject = SpringArm
 		update_capsule_visibility()
 
@@ -58,10 +58,11 @@ var camera_v : float = 0
 @export var camera_vertical_max : float = 90
 
 ## Assign a [camera_values] resource to it and change its values to tweak camera settings
-@export var camera_settings : camera_values = camera_values.new()
+@export var camera_settings : camera_values
 @export var first_person_camera_bone : BoneAttachment3D
-var current_fov : float = 90.0
-var acceleration_h = 10
+
+var current_fov: float = 90.0
+@export var acceleration_h = 10
 var acceleration_v = 10
 
 var spring_arm_position_relative_to_player: Vector3
@@ -89,6 +90,20 @@ func _ready() -> void:
 	zoom_scroll_offset = 0.0
 	if SpringArm:
 		SpringArm.top_level = true
+		var parent_node: Node3D = get_parent() as Node3D
+		if parent_node:
+			var init_pos: Vector3 = parent_node.global_position + spring_arm_position_relative_to_player if view_mode == Global.view_mode.third_person else parent_node.global_position + Vector3(0, current_first_person_height, 0)
+			SpringArm.global_position = init_pos
+		match view_mode:
+			Global.view_mode.first_person:
+				view_angle = Global.view_angle.head
+				if PlayerRef:
+					PlayerRef.rotation_mode = Global.rotation_mode.looking_direction
+				SpringArm.spring_length = -0.4
+				VObject = Camera
+			Global.view_mode.third_person:
+				SpringArm.spring_length = 3.5
+				VObject = SpringArm
 	set_process_input(true)
 	call_deferred("update_capsule_visibility")
 
@@ -107,9 +122,6 @@ func _physics_process(delta: float) -> void:
 
 	var target_pos: Vector3 = get_parent().global_position + spring_arm_position_relative_to_player if view_mode == Global.view_mode.third_person else (first_person_camera_bone.global_position if first_person_camera_bone else get_parent().global_position + Vector3(0, current_first_person_height, 0))
 	var lerp_factor: float = (1.0 / camera_settings.camera_inertia) if view_mode == Global.view_mode.third_person and camera_settings else 1.0
-	if view_mode == Global.view_mode.first_person:
-		# Make first-person crouch smooth instead of instant (was 1.0)
-		lerp_factor = clampf(delta * crouch_transition_speed * 1.2, 0.0, 1.0)
 	SpringArm.position = SpringArm.position.lerp(target_pos, lerp_factor)
 	
 	camera_v = clampf(camera_v, deg_to_rad(camera_vertical_min), deg_to_rad(camera_vertical_max))

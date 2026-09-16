@@ -99,6 +99,8 @@ aim_crouch_data = ExtResource("5_crouch")
 
 [node name="CameraComponent" type="Node" parent="." unique_id=819195818 node_paths=PackedStringArray("SpringArm", "Camera", "PlayerRef")]
 script = ExtResource("2_cc")
+view_mode = 1
+view_angle = 2
 SpringArm = NodePath("../SpringArm3D")
 Camera = NodePath("../SpringArm3D/Camera")
 PlayerRef = NodePath("../CharacterMovementComponent")
