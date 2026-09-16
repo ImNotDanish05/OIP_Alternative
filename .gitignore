@@ -23,5 +23,6 @@ build_app_*
 *.x86_64
 /libOIP-COMMS*.so
 
-# AMSG Stuff
+# Other Stuff
 AMSG_Examples
+.workspace

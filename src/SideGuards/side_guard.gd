@@ -53,9 +53,9 @@ func _update_collision_shape() -> void:
 		body = StaticBody3D.new()
 		body.name = "StaticBody3D"
 		# mask=8 sees cargo; ghost filtering blocks tunneling; friction=0 so cargo slides.
-		body.disable_mode = StaticBody3D.DISABLE_MODE_MAKE_STATIC
 		body.collision_mask = 8
-		body.ghost_collision_filtering_enabled = true
+		if "ghost_collision_filtering_enabled" in body:
+			body.set("ghost_collision_filtering_enabled", true)
 		var phys := PhysicsMaterial.new()
 		phys.friction = 0.0
 		body.physics_material_override = phys

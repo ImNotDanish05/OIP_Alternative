@@ -28,11 +28,28 @@ static func import_scene(doc: Dictionary, parent: Node) -> Array[Node]:
 	for entry_v: Variant in parts:
 		var part: Dictionary = entry_v
 		var type_name := String(part.get("type", ""))
-		if not parts_def.has(type_name):
+		if type_name == "part":
+			var pkg := String(part.get("packageId", "")).trim_prefix("oip.").replace("-", "_")
+			if parts_def.has(pkg):
+				type_name = pkg
+			elif pkg == "shape":
+				type_name = "shape"
+		elif type_name == "annotation":
+			pass
+
+		if not parts_def.has(type_name) and type_name != "shape" and type_name != "annotation":
 			push_warning("scene_io: no mapping for type '%s', skipping" % type_name)
 			continue
-		var pmap: Dictionary = parts_def[type_name]
-		var node := _instantiate_part(pmap)
+
+		var pmap: Dictionary = parts_def.get(type_name, {})
+		var node: Node = null
+		if type_name == "shape":
+			node = _instantiate_shape(part)
+		elif type_name == "annotation":
+			node = _instantiate_annotation(part)
+		else:
+			node = _instantiate_part(pmap)
+
 		if node == null:
 			push_warning("scene_io: cannot create '%s'" % type_name)
 			continue
@@ -61,15 +78,25 @@ static func import_scene(doc: Dictionary, parent: Node) -> Array[Node]:
 			push_warning("scene_io: parent id '%s' not found for '%s'; keeping it top-level" % [pid, node.name])
 			continue
 		var new_parent: Node = id_to_node[pid]
-		if node is Node3D:
-			node.reparent(new_parent, true)
+		if node is Node3D and new_parent is Node3D:
+			var n3 := node as Node3D
+			var p3 := new_parent as Node3D
+			var world_xform: Transform3D = n3.global_transform if n3.is_inside_tree() else n3.transform
+			var parent_xform: Transform3D = p3.global_transform if p3.is_inside_tree() else p3.transform
+			if n3.get_parent() != null:
+				n3.get_parent().remove_child(n3)
+			p3.add_child(n3)
+			n3.transform = parent_xform.affine_inverse() * world_xform
 		else:
-			node.get_parent().remove_child(node)
+			if node.get_parent() != null:
+				node.get_parent().remove_child(node)
 			new_parent.add_child(node)
 	if doc.has("stProgram"):
 		parent.set_meta("oip_st_program", String(doc["stProgram"]))
 	if doc.has("scanMs"):
 		parent.set_meta("oip_st_scan_ms", int(doc["scanMs"]))
+	elif doc.has("stScanMs"):
+		parent.set_meta("oip_st_scan_ms", int(doc["stScanMs"]))
 	return created
 
 
@@ -81,6 +108,75 @@ static func _instantiate_part(pmap: Dictionary) -> Node:
 	if packed == null:
 		return null
 	return packed.instantiate()
+
+
+static func _instantiate_shape(part: Dictionary) -> Node3D:
+	var params: Dictionary = part.get("params", {})
+	var shape_type := String(params.get("shape", "cylinder"))
+	var mi := MeshInstance3D.new()
+	var mat := StandardMaterial3D.new()
+	var color_str := String(params.get("color", "#9aa3ad")).trim_prefix("#")
+	mat.albedo_color = Color.html(color_str)
+	mat.roughness = 0.5
+	if shape_type == "cylinder":
+		var cyl := CylinderMesh.new()
+		var diam := float(params.get("width", 0.1))
+		var r := diam * 0.5
+		cyl.top_radius = r
+		cyl.bottom_radius = r
+		var h := float(params.get("height", 1.0))
+		cyl.height = h
+		cyl.radial_segments = int(params.get("sides", 16))
+		mi.mesh = cyl
+		mi.material_override = mat
+		mi.position.y = h * 0.5
+		var container := Node3D.new()
+		container.add_child(mi)
+		return container
+	elif shape_type == "box":
+		var bx := BoxMesh.new()
+		var l := float(params.get("length", 1.0))
+		var h := float(params.get("height", 1.0))
+		var w := float(params.get("width", 1.0))
+		bx.size = Vector3(l, h, w)
+		mi.mesh = bx
+		mi.material_override = mat
+		mi.position.y = h * 0.5
+		var container := Node3D.new()
+		container.add_child(mi)
+		return container
+	return Node3D.new()
+
+
+static func _instantiate_annotation(part: Dictionary) -> Node3D:
+	var params: Dictionary = part.get("params", {})
+	var text := String(params.get("text", ""))
+	var tag := String(params.get("tag", ""))
+	var label := Label3D.new()
+	label.text = "%s [%s]" % [text, tag] if not tag.is_empty() else text
+	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	label.double_sided = true
+	label.font_size = 24
+	label.outline_size = 6
+	label.modulate = Color(1.0, 0.9, 0.4)
+	return label
+
+
+static func _v4_param_alias(web_key: String) -> String:
+	match web_key:
+		"tag":
+			return "speedTag"
+		"gripperTag":
+			return "forkTag"
+		"motionSpeed":
+			return "speed"
+		"robotScale":
+			return "scale"
+		"deckAngleDeg":
+			return "angleTag"
+		_:
+			return ""
+
 
 
 static func _apply_transform(node: Node, part: Dictionary, pmap: Dictionary) -> void:
@@ -114,7 +210,17 @@ static func _apply_params(node: Node, params: Dictionary, param_maps: Array) -> 
 		if convert == "partRef":
 			continue
 		var web_key := String(pm.get("web", ""))
-		if not params.has(web_key):
+		var val_found := false
+		var raw_val: Variant = null
+		if params.has(web_key):
+			raw_val = params[web_key]
+			val_found = true
+		else:
+			var alias := _v4_param_alias(web_key)
+			if alias != "" and params.has(alias):
+				raw_val = params[alias]
+				val_found = true
+		if not val_found:
 			continue
 		var godot_key := String(pm.get("godot", ""))
 		if convert == "vec3":
@@ -124,7 +230,7 @@ static func _apply_params(node: Node, params: Dictionary, param_maps: Array) -> 
 					cur = node.get(godot_key)
 				vec3_acc[godot_key] = cur
 			var vec: Vector3 = vec3_acc[godot_key]
-			var val := float(params[web_key])
+			var val := float(raw_val)
 			match String(pm.get("component", "x")):
 				"x":
 					vec.x = val
@@ -135,20 +241,29 @@ static func _apply_params(node: Node, params: Dictionary, param_maps: Array) -> 
 			vec3_acc[godot_key] = vec
 			continue
 		if convert == "stackLights":
-			_apply_stack_lights(node, params[web_key] as Array)
+			_apply_stack_lights(node, raw_val as Array)
 			continue
 		if convert == "wallRules":
-			node.set("rules", _to_wall_rules(params[web_key] as Array))
+			node.set("rules", _to_wall_rules(raw_val as Array))
 			continue
 		if convert == "waypoints":
-			_apply_waypoints(node, params[web_key] as Dictionary)
+			_apply_waypoints(node, raw_val)
 			continue
-		var gv: Variant = _web_to_godot(convert, params[web_key], pm)
+		var gv: Variant = _web_to_godot(convert, raw_val, pm)
 		node.set(godot_key, gv)
 		for k_v: Variant in (pm.get("alsoGodot", []) as Array):
 			node.set(String(k_v), gv)
 	for gk: String in vec3_acc.keys():
 		node.set(gk, vec3_acc[gk])
+
+	if node is SixAxisRobot:
+		if params.has("toolSizeX"): node.set("tool_size_x", float(params["toolSizeX"]))
+		if params.has("toolSizeZ"): node.set("tool_size_z", float(params["toolSizeZ"]))
+		if params.has("cupPitchX"): node.set("cup_pitch_x", float(params["cupPitchX"]))
+		if params.has("cupPitchZ"): node.set("cup_pitch_z", float(params["cupPitchZ"]))
+		if params.has("cupMarginX"): node.set("cup_margin_x", float(params["cupMarginX"]))
+		if params.has("cupMarginZ"): node.set("cup_margin_z", float(params["cupMarginZ"]))
+		if params.has("cupsEnabled"): node.set("cups_enabled", bool(params["cupsEnabled"]))
 
 
 static func _apply_refs(node: Node, params: Dictionary, param_maps: Array, id_to_node: Dictionary) -> void:
@@ -465,22 +580,37 @@ static func _wall_name(value: int) -> String:
 	return "D"
 
 
-static func _apply_waypoints(node: Node, store: Dictionary) -> void:
+static func _apply_waypoints(node: Node, store: Variant) -> void:
 	var is_agv := "home_yaw_deg" in node
-	var home: Array = store.get("home", [])
+	if typeof(store) == TYPE_ARRAY:
+		var arr: Array = store as Array
+		var dict := {}
+		for i: int in arr.size():
+			var item: Variant = arr[i]
+			var key_name := "%d: Point%d" % [i + 1, i + 1]
+			dict[key_name] = _encode_pose(is_agv, item)
+		node.set("waypoints", dict)
+		if not dict.is_empty():
+			node.set("selected_waypoint", dict.keys()[0])
+			node.set("new_waypoint_name", "Point%d" % [arr.size() + 1])
+		return
+	if typeof(store) != TYPE_DICTIONARY:
+		return
+	var store_dict: Dictionary = store
+	var home: Array = store_dict.get("home", [])
 	if is_agv:
 		node.set("home_position", _to_xz_vec(home))
 		node.set("home_yaw_deg", float(home[2]) if home.size() > 2 else 0.0)
 	else:
 		node.set("home_position", _to_float_array(home))
 	var dict := {}
-	var points: Array = store.get("points", [])
+	var points: Array = store_dict.get("points", [])
 	for i: int in points.size():
 		var pt: Dictionary = points[i]
 		dict["%d: %s" % [i + 1, String(pt.get("name", ""))]] = _encode_pose(is_agv, pt.get("pose", []))
 	node.set("waypoints", dict)
-	node.set("selected_waypoint", _find_key_for_name(dict, String(store.get("selected", ""))))
-	node.set("new_waypoint_name", String(store.get("newName", "Point1")))
+	node.set("selected_waypoint", _find_key_for_name(dict, String(store_dict.get("selected", ""))))
+	node.set("new_waypoint_name", String(store_dict.get("newName", "Point1")))
 
 
 static func _read_waypoints(node: Node) -> Dictionary:
