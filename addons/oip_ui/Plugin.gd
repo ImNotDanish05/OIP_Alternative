@@ -134,6 +134,12 @@ func _create_new_simulation() -> void:
 	if get_tree().edited_scene_root:
 		get_tree().edited_scene_root.add_child(building)
 		building.owner = scene
+		# Also add a runtime Player (capsule) so pressing Play immediately gives a controllable character.
+		if ResourceLoader.exists("res://parts/Player.tscn"):
+			var player: Node3D = load("res://parts/Player.tscn").instantiate()
+			player.position = Vector3(0.0, 2.0, 8.0)
+			get_tree().edited_scene_root.add_child(player)
+			player.owner = scene
 
 
 func _remove_new_simulation() -> void:

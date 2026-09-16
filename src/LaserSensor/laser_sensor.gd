@@ -25,7 +25,7 @@ extends Node3D
 		distance = value
 
 var _mesh: ImmediateMesh
-static var _beam_material: StandardMaterial3D = preload("uid://ntmcfd25jgpm")
+static var _beam_material: StandardMaterial3D = preload("res://assets/3DModels/sensor_beam_material.tres")
 var _instance: RID
 var _scenario: RID
 var _ray_query: PhysicsRayQueryParameters3D

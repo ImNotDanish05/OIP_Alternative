@@ -1,0 +1,114 @@
+[gd_scene format=3 uid="uid://bp5sxcp134uj2"]
+
+[ext_resource type="Script" uid="uid://73uj143uilyo" path="res://addons/AMSG/Components/CharacterMovementComponent.gd" id="1_cmc"]
+[ext_resource type="Script" uid="uid://bpfvgikr4qpbb" path="res://addons/AMSG/Components/CameraComponent.gd" id="2_cc"]
+[ext_resource type="Script" uid="uid://boy6it8viv5wh" path="res://src/Player/amsg_capsule_controller.gd" id="3_ctrl"]
+[ext_resource type="Resource" uid="uid://buhjkpv85gdmi" path="res://AMSG_Examples/Character/standing_movement_values.tres" id="4_stand"]
+[ext_resource type="Resource" uid="uid://bo31hnmxahuqb" path="res://AMSG_Examples/Character/crouch_movement_values.tres" id="5_crouch"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_main"]
+radius = 0.35
+height = 1.7
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_main"]
+radius = 0.35
+height = 1.7
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_capsule"]
+albedo_color = Color(0.2, 0.55, 0.9, 1)
+metallic = 0.1
+roughness = 0.6
+
+[sub_resource type="SeparationRayShape3D" id="SeparationRayShape3D_stair"]
+length = 0.5
+
+[node name="Player" type="CharacterBody3D" unique_id=402586009 groups=["player"]]
+collision_layer = 2
+collision_mask = 31
+floor_constant_speed = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=245031883]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_main")
+debug_color = Color(0.2, 0.55, 0.9, 0.42)
+
+[node name="Visual" type="Node3D" parent="." unique_id=557553326]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+
+[node name="Capsule" type="MeshInstance3D" parent="Visual" unique_id=1229648426]
+mesh = SubResource("CapsuleMesh_main")
+surface_material_override/0 = SubResource("StandardMaterial3D_capsule")
+
+[node name="GroundCheck" type="RayCast3D" parent="." unique_id=385946421]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.186, 0)
+target_position = Vector3(0, -0.4, 0)
+hit_from_inside = true
+
+[node name="StairCollisionShape3D" type="CollisionShape3D" parent="." unique_id=1954616057]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.5, 0.5)
+shape = SubResource("SeparationRayShape3D_stair")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="." unique_id=780947850]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+spring_length = 3.5
+margin = 0.1
+
+[node name="Camera" type="Camera3D" parent="SpringArm3D" unique_id=865277774]
+current = true
+far = 1500.0
+
+[node name="TargetRayCast" type="RayCast3D" parent="SpringArm3D/Camera" unique_id=1762656365]
+target_position = Vector3(0, 0, -10)
+
+[node name="Flashlight" type="SpotLight3D" parent="SpringArm3D/Camera" unique_id=987654321]
+visible = false
+light_color = Color(0.96, 0.98, 1, 1)
+light_energy = 2.5
+shadow_enabled = true
+spot_range = 30.0
+spot_angle = 40.0
+
+[node name="FlashlightAudio" type="AudioStreamPlayer3D" parent="SpringArm3D/Camera" unique_id=234567890]
+unit_size = 2.0
+max_distance = 15.0
+
+[node name="FootstepAudio" type="AudioStreamPlayer3D" parent="." unique_id=123456789]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+unit_size = 3.0
+max_distance = 25.0
+max_polyphony = 3
+
+[node name="CharacterMovementComponent" type="Node" parent="." unique_id=1885996551 node_paths=PackedStringArray("mesh_ref", "collision_shape_ref", "camera_root", "character_node", "ground_check", "stair_collision_shape_3d")]
+script = ExtResource("1_cmc")
+mesh_ref = NodePath("../Visual")
+collision_shape_ref = NodePath("../CollisionShape3D")
+camera_root = NodePath("../CameraComponent")
+character_node = NodePath("..")
+ground_check = NodePath("../GroundCheck")
+tilt_power = 0.0
+jump_magnitude = 4.5
+stair_collision_shape_3d = NodePath("../StairCollisionShape3D")
+deacceleration = 8.0
+looking_direction_standing_data = ExtResource("4_stand")
+looking_direction_crouch_data = ExtResource("5_crouch")
+velocity_direction_standing_data = ExtResource("4_stand")
+velocity_direction_crouch_data = ExtResource("5_crouch")
+aim_standing_data = ExtResource("4_stand")
+aim_crouch_data = ExtResource("5_crouch")
+
+[node name="CameraComponent" type="Node" parent="." unique_id=819195818 node_paths=PackedStringArray("SpringArm", "Camera", "PlayerRef")]
+script = ExtResource("2_cc")
+SpringArm = NodePath("../SpringArm3D")
+Camera = NodePath("../SpringArm3D/Camera")
+PlayerRef = NodePath("../CharacterMovementComponent")
+camera_vertical_min = -60.0
+camera_vertical_max = 60.0
+
+[node name="AMSGCapsuleController" type="Node" parent="." unique_id=1326045857 node_paths=PackedStringArray("character_component", "camera_component", "footstep_player", "flashlight", "flashlight_audio")]
+script = ExtResource("3_ctrl")
+character_component = NodePath("../CharacterMovementComponent")
+camera_component = NodePath("../CameraComponent")
+footstep_player = NodePath("../FootstepAudio")
+flashlight = NodePath("../SpringArm3D/Camera/Flashlight")
+flashlight_audio = NodePath("../SpringArm3D/Camera/FlashlightAudio")

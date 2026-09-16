@@ -107,7 +107,7 @@ shadow_opacity = 0.6
 shadow_blur = 0.5
 shadow_caster_mask = 2
 directional_shadow_mode = 0
-directional_shadow_max_distance = 66.51315
+directional_shadow_max_distance = 50.0
 sky_mode = 1
 
 [node name="DirectionalWallB" type="DirectionalLight3D" parent="." unique_id=1612400932]
@@ -121,7 +121,7 @@ shadow_opacity = 0.6
 shadow_blur = 0.5
 shadow_caster_mask = 4
 directional_shadow_mode = 0
-directional_shadow_max_distance = 66.51315
+directional_shadow_max_distance = 50.0
 sky_mode = 1
 
 [node name="DirectionalWallAFill" type="DirectionalLight3D" parent="." unique_id=1612400933]
@@ -143,6 +143,7 @@ directional_shadow_max_distance = 66.51315
 sky_mode = 1
 
 [node name="Floor" type="GridMap" parent="." unique_id=1032330647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 mesh_library = ExtResource("2_iohv4")
 cell_size = Vector3(10, 10, 10)
 cell_center_x = false
@@ -155,32 +156,33 @@ data = {
 metadata/_editor_floor_ = Vector3(0, -1, 0)
 
 [node name="WallsA" type="GridMap" parent="." unique_id=1289864612]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 mesh_library = ExtResource("3_3d0q8")
 cell_size = Vector3(10, 6, 10)
 cell_octant_size = 6
 cell_center_x = false
 cell_center_y = false
 cell_center_z = false
-render_layers = 2
 data = {
-"cells": PackedInt32Array(65534, 65534, 3, 65535, 65534, 1, 0, 65534, 3, 1, 65534, 1, 2, 65534, 3, 3, 65534, 1441792, 3, 65535, 1441795, 3, 0, 1441795, 3, 1, 1441792, 196606, 65534, 2, 196607, 65534, 2, 131072, 65534, 2, 131073, 65534, 2, 131074, 65534, 2, 131075, 65534, 1441794, 131075, 65535, 1441794, 131075, 0, 1441794, 131075, 1, 1441794, 196611, 65534, 1441794, 196611, 65535, 1441794, 196611, 0, 1441794, 196611, 1, 1441794)
+"cells": PackedInt32Array(65534, 65534, 3, 65535, 65534, 1, 1, 65534, 1, 2, 65534, 3, 3, 65534, 1441792, 3, 65535, 1441795, 3, 0, 1441795, 3, 1, 1441792, 196606, 65534, 2, 196607, 65534, 2, 131072, 65534, 2, 131073, 65534, 2, 131074, 65534, 2, 131075, 65534, 1441794, 131075, 65535, 1441794, 131075, 0, 1441794, 131075, 1, 1441794, 196611, 65534, 1441794, 196611, 65535, 1441794, 196611, 0, 1441794, 196611, 1, 1441794)
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
 [node name="WallsB" type="GridMap" parent="." unique_id=1289864613]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 mesh_library = ExtResource("3_3d0q8")
 cell_size = Vector3(10, 6, 10)
 cell_octant_size = 6
 cell_center_x = false
 cell_center_y = false
 cell_center_z = false
-render_layers = 4
 data = {
 "cells": PackedInt32Array(65535, 2, 655363, 0, 2, 655361, 1, 2, 655363, 2, 2, 655361, 3, 2, 655363, 65534, 65535, 1048576, 65534, 0, 1048579, 65534, 1, 1048579, 65534, 2, 1048576, 196607, 2, 655362, 131072, 2, 655362, 131073, 2, 655362, 131074, 2, 655362, 131075, 2, 655362, 196606, 65535, 1048578, 196606, 0, 1048578, 196606, 1, 1048578, 196606, 2, 1048578, 262142, 65535, 1048578, 262142, 0, 1048578, 262142, 1, 1048578, 262142, 2, 1048578)
 }
 metadata/_editor_floor_ = Vector3(0, 0, 0)
 
 [node name="Roof" type="GridMap" parent="." unique_id=1331643088]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 mesh_library = ExtResource("4_5rwsc")
 cell_size = Vector3(10, 9, 10)
 cell_center_x = false
@@ -192,6 +194,7 @@ data = {
 metadata/_editor_floor_ = Vector3(0, 2, 0)
 
 [node name="DockDoors" type="Node3D" parent="." unique_id=299569443]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, 0)
 
 [node name="ThumbnailMesh" type="MeshInstance3D" parent="." unique_id=299569442]
 transform = Transform3D(50, 0, 0, 0, 50, 0, 0, 0, 50, 0, 0, 0)

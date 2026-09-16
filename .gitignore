@@ -22,3 +22,6 @@ build_app_*
 *.pck
 *.x86_64
 /libOIP-COMMS*.so
+
+# AMSG Stuff
+AMSG_Examples
