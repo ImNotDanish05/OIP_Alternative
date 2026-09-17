@@ -95,7 +95,7 @@ func _physics_process(delta: float) -> void:
 	if conveyor and Simulation.is_running() and &"speed" in conveyor:
 		_conveyor_stopped = conveyor.speed == 0
 
-	if disable or _conveyor_stopped or not Simulation.is_running():
+	if disable or _conveyor_stopped or not Simulation.is_running() or Simulation.is_paused():
 		return
 	
 	_scan_interval += delta

@@ -283,6 +283,8 @@ func _enter_tree() -> void:
 		Simulation.started.connect(_on_simulation_started)
 	if not Simulation.stopped.is_connected(_on_simulation_ended):
 		Simulation.stopped.connect(_on_simulation_ended)
+	if not Simulation.pause_toggled.is_connected(_on_simulation_pause_toggled):
+		Simulation.pause_toggled.connect(_on_simulation_pause_toggled)
 	running = Simulation.is_running()
 
 	OIPCommsSetup.connect_comms(self, _tag_group_initialized, _tag_group_polled)
@@ -320,6 +322,8 @@ func _exit_tree() -> void:
 		Simulation.started.disconnect(_on_simulation_started)
 	if Simulation.stopped.is_connected(_on_simulation_ended):
 		Simulation.stopped.disconnect(_on_simulation_ended)
+	if Simulation.pause_toggled.is_connected(_on_simulation_pause_toggled):
+		Simulation.pause_toggled.disconnect(_on_simulation_pause_toggled)
 
 	OIPCommsSetup.disconnect_comms(self, _tag_group_initialized, _tag_group_polled)
 
@@ -436,13 +440,14 @@ func _physics_process(_delta: float) -> void:
 	if LegFooting.legs_state_changed(self, _legs_state):
 		_rebuild_legs()
 		_legs_state = LegFooting.capture_leg_state(self)
-	if running and _roller_material:
+	if running and not Simulation.is_paused() and _roller_material:
 		var roller_speed := speed / cos(deg_to_rad(skew_angle)) if absf(skew_angle) < 89.0 else speed
 		var circumference := 2.0 * PI * _roller_radius()
 		# Multiply by tiles-per-wrap (uv1_scale.x) so the surface tracks the belt at no-slip speed.
 		var bands: float = _roller_material.uv1_scale.x
 		_roller_material.uv1_offset.x = fmod(_roller_material.uv1_offset.x + bands * roller_speed * _delta / circumference, 1.0)
-	_align_cargo_to_guards()
+	if not Simulation.is_paused():
+		_align_cargo_to_guards()
 
 
 func set_roller_override_material(material: Material) -> void:
@@ -630,11 +635,15 @@ func _apply_incline() -> void:
 		update_gizmos()
 
 
+func _on_simulation_pause_toggled(_is_paused: bool) -> void:
+	_update_conveyor_velocity()
+
+
 func _update_conveyor_velocity() -> void:
 	if not _simple_conveyor_shape:
 		return
 
-	if running and speed != 0.0:
+	if running and not Simulation.is_paused() and speed != 0.0:
 		var local_x := _simple_conveyor_shape.global_transform.basis.x.normalized()
 		var local_y := _simple_conveyor_shape.global_transform.basis.y.normalized()
 		var angle_rad := deg_to_rad(skew_angle)

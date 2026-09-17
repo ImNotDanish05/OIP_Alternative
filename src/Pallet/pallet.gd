@@ -102,6 +102,7 @@ func _on_simulation_ended() -> void:
 	if instanced:
 		queue_free()
 	else:
+		_rigid_body.freeze = true
 		_rigid_body.top_level = false
 		_rigid_body.transform = Transform3D.IDENTITY
 		_rigid_body.linear_velocity = Vector3.ZERO
@@ -109,6 +110,9 @@ func _on_simulation_ended() -> void:
 		# Work around for #83
 		if _enable_initial_transform:
 			global_transform = _initial_transform
+			PhysicsServer3D.body_set_state(_rigid_body.get_rid(), PhysicsServer3D.BODY_STATE_TRANSFORM, _initial_transform)
+			_rigid_body.global_transform = _initial_transform
+			_rigid_body.reset_physics_interpolation()
 			_enable_initial_transform = false
 
 func _on_simulation_set_paused(paused: bool) -> void:

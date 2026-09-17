@@ -4,7 +4,7 @@ extends Node
 
 signal started_signal
 signal stopped_signal
-signal pause_toggled_signal
+signal pause_toggled_signal(paused: bool)
 
 static var _instance: Simulation = null
 static var _running: bool = false
@@ -71,7 +71,7 @@ func _on_native_pause_toggled() -> void:
 			_paused = not _paused
 	else:
 		_paused = not _paused
-	pause_toggled_signal.emit()
+	pause_toggled_signal.emit(_paused)
 
 
 static func start() -> void:
@@ -94,7 +94,7 @@ static func stop() -> void:
 		if native.has_method("stop"):
 			native.call("stop")
 			return
-	if _running:
+	if _running or _paused:
 		_running = false
 		_paused = false
 		_instance.stopped_signal.emit()
@@ -108,7 +108,41 @@ static func toggle_pause() -> void:
 			native.call("toggle_pause")
 			return
 	_paused = not _paused
-	_instance.pause_toggled_signal.emit()
+	_instance.pause_toggled_signal.emit(_paused)
+
+
+static func resume() -> void:
+	if not _running:
+		start()
+	elif _paused:
+		toggle_pause()
+
+
+static func pause() -> void:
+	if _running and not _paused:
+		toggle_pause()
+
+
+static func restart() -> void:
+	_ensure_instance()
+	if _instance:
+		_instance._do_restart()
+
+
+func _do_restart() -> void:
+	if _running and not _paused:
+		pause()
+	if _running or _paused:
+		stop()
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree:
+		await tree.physics_frame
+		await tree.process_frame
+	start()
+
+
+static func rewind() -> void:
+	restart()
 
 
 static func is_running() -> bool:

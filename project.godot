@@ -27,6 +27,7 @@ StructureSnapping="*res://addons/oip_ui/Autoload/StructureSnapping.gd"
 OIPCommsService="*res://src/comms/oip_comms_service.gd"
 SoftPlcBridge="*res://src/comms/soft_plc_bridge.gd"
 PlayerSpawner="*res://src/Player/player_spawner.gd"
+SimulationController="*res://src/simulation_controller.gd"
 Global="*res://addons/AMSG/Global.gd"
 
 [debug]
