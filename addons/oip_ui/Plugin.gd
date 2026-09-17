@@ -12,9 +12,13 @@ var _create_root_vbox: VBoxContainer
 var _selected_nodes: Array[Node]
 var _live_snap_button: Button
 var _live_snap_shortcut: Shortcut
+var _cam_track_timer: float = 0.0
+var _last_saved_cam_transform: Transform3D = Transform3D()
+var _last_forwarded_camera: Camera3D = null
 
 
 func _enter_tree() -> void:
+	set_input_event_forwarding_always_enabled()
 	_editor_node = get_tree().root.get_child(0)
 	if _editor_node and _editor_node.has_signal("editor_layout_loaded"):
 		_editor_node.connect("editor_layout_loaded", _editor_layout_loaded)
@@ -71,12 +75,68 @@ func _editor_layout_loaded() -> void:
 			(EditorInterface as Object).call("mark_scene_as_saved")
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_track_editor_camera(delta)
 	for node: Node in _selected_nodes:
 		if not node:
 			return
 		if node.has_method("selected"):
 			node.call("selected")
+
+
+func _forward_3d_gui_input(viewport_camera: Camera3D, _event: InputEvent) -> int:
+	if viewport_camera:
+		_last_forwarded_camera = viewport_camera
+		_check_and_save_camera(viewport_camera)
+	return AfterGUIInput.AFTER_GUI_INPUT_PASS
+
+
+func _track_editor_camera(delta: float) -> void:
+	_cam_track_timer += delta
+	if _cam_track_timer < 0.1:
+		return
+	_cam_track_timer = 0.0
+
+	var cam: Camera3D = _get_editor_camera()
+	if cam:
+		_check_and_save_camera(cam)
+
+
+func _check_and_save_camera(cam: Camera3D) -> void:
+	if cam == null:
+		return
+	if cam.global_transform != _last_saved_cam_transform:
+		_last_saved_cam_transform = cam.global_transform
+		_save_editor_camera(cam)
+
+
+func _get_editor_camera() -> Camera3D:
+	if _last_forwarded_camera != null and is_instance_valid(_last_forwarded_camera):
+		return _last_forwarded_camera
+
+	var vp: SubViewport = EditorInterface.get_editor_viewport_3d(0)
+	if vp:
+		var c: Camera3D = vp.get_camera_3d()
+		if c:
+			return c
+		var cameras: Array[Node] = vp.find_children("*", "Camera3D", true, false)
+		if not cameras.is_empty():
+			return cameras[0] as Camera3D
+	return null
+
+
+func _save_editor_camera(cam: Camera3D) -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("camera", "transform", cam.global_transform)
+	cfg.set_value("camera", "fov", cam.fov)
+	cfg.save("res://oip_data/editor_camera.cfg")
+
+
+func _build() -> bool:
+	var cam: Camera3D = _get_editor_camera()
+	if cam:
+		_save_editor_camera(cam)
+	return true
 
 
 func _shortcut_input(event: InputEvent) -> void:
@@ -90,6 +150,9 @@ func _shortcut_input(event: InputEvent) -> void:
 
 
 func _exit_tree() -> void:
+	var cam: Camera3D = _get_editor_camera()
+	if cam:
+		_save_editor_camera(cam)
 	if _live_snap_shortcut and _live_snap_shortcut.changed.is_connected(_update_live_snap_tooltip):
 		_live_snap_shortcut.changed.disconnect(_update_live_snap_tooltip)
 	if _live_snap_button:

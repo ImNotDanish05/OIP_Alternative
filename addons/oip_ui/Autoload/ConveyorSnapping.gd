@@ -59,6 +59,33 @@ func _enter_tree() -> void:
 	add_child(live_snap)
 
 
+var _cam_save_timer: float = 0.0
+var _last_cam_xform: Transform3D = Transform3D()
+
+func _process(delta: float) -> void:
+	if not Engine.is_editor_hint():
+		return
+	_cam_save_timer += delta
+	if _cam_save_timer < 0.15:
+		return
+	_cam_save_timer = 0.0
+
+	var vp: SubViewport = EditorInterface.get_editor_viewport_3d(0)
+	if vp == null:
+		return
+	var cam: Camera3D = vp.get_camera_3d()
+	if cam == null:
+		var cams: Array[Node] = vp.find_children("*", "Camera3D", true, false)
+		if not cams.is_empty():
+			cam = cams[0] as Camera3D
+	if cam and cam.global_transform != _last_cam_xform:
+		_last_cam_xform = cam.global_transform
+		var cfg := ConfigFile.new()
+		cfg.set_value("camera", "transform", cam.global_transform)
+		cfg.set_value("camera", "fov", cam.fov)
+		cfg.save("res://oip_data/editor_camera.cfg")
+
+
 func _input(event: InputEvent) -> void:
 	if not Engine.is_editor_hint():
 		return

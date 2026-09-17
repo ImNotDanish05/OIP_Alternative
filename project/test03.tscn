@@ -1,27 +1,26 @@
 [gd_scene format=3 uid="uid://bk1f3vo4udkwp"]
 
-[ext_resource type="PackedScene" uid="uid://dyhvoundu2kqc" path="res://parts/Building.tscn" id="1_8j2kw"]
-[ext_resource type="Script" uid="uid://b0216dkga4vul" path="res://parts/building.gd" id="2_mummd"]
-[ext_resource type="Script" uid="uid://1it35d0vq4ou" path="res://parts/building_wall_rule.gd" id="3_3eiy4"]
-[ext_resource type="PackedScene" uid="uid://bp5sxcp134uj2" path="res://parts/Player.tscn" id="4_wkeod"]
+[ext_resource type="Script" uid="uid://b0216dkga4vul" path="res://parts/building.gd" id="2_3eiy4"]
+[ext_resource type="Script" uid="uid://1it35d0vq4ou" path="res://parts/building_wall_rule.gd" id="3_wkeod"]
+[ext_resource type="PackedScene" uid="uid://dyhvoundu2kqc" path="res://parts/Building.tscn" id="4_mummd"]
 [ext_resource type="PackedScene" uid="uid://dm55h6ap605bw" path="res://parts/BeltConveyor.tscn" id="5_3eiy4"]
+[ext_resource type="PackedScene" uid="uid://bp5sxcp134uj2" path="res://parts/Player.tscn" id="5_wkeod"]
 [ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="6_wkeod"]
-[ext_resource type="PackedScene" uid="uid://bq16fe5njnr2i" path="res://parts/Box.tscn" id="7_wkeod"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
-script = ExtResource("3_3eiy4")
+script = ExtResource("3_wkeod")
 count = 2
 start = 1
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
 [sub_resource type="Resource" id="Resource_ymq1x"]
-script = ExtResource("3_3eiy4")
+script = ExtResource("3_wkeod")
 count = 2
 start = 24
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
 [sub_resource type="Resource" id="Resource_2wb5a"]
-script = ExtResource("3_3eiy4")
+script = ExtResource("3_wkeod")
 wall = 0
 gap = 2
 count = 2
@@ -29,7 +28,7 @@ start = 32
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
 [sub_resource type="Resource" id="Resource_522rc"]
-script = ExtResource("3_3eiy4")
+script = ExtResource("3_wkeod")
 wall = 0
 gap = 2
 count = 2
@@ -37,7 +36,7 @@ start = 28
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
 [sub_resource type="Resource" id="Resource_wqnqx"]
-script = ExtResource("3_3eiy4")
+script = ExtResource("3_wkeod")
 wall = 4
 count = 1
 start = 2
@@ -47,32 +46,28 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 [sub_resource type="Resource" id="Resource_u3pq0"]
 resource_local_to_scene = true
 script = ExtResource("6_wkeod")
-length = 6.261447862989732
-metadata/_belt_conveyor_owner = 7308507680645
+length = 10.800825360389393
+metadata/_belt_conveyor_owner = 2813757296857
 
-[node name="Simulation" type="Node3D" unique_id=1929163652]
+[node name="Simulation" type="Node3D" unique_id=231966514]
 
-[node name="Building" type="Node3D" parent="." unique_id=183560046 instance=ExtResource("1_8j2kw")]
-script = ExtResource("2_mummd")
+[node name="Building" type="Node3D" parent="." unique_id=183560046 instance=ExtResource("4_mummd")]
+script = ExtResource("2_3eiy4")
 width_sections = 5
 length_sections = 4
 default_wall = 3
-rules = Array[ExtResource("3_3eiy4")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])
+rules = Array[ExtResource("3_wkeod")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])
 shadow_quality = 2
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=402586009 groups=["player"] instance=ExtResource("4_wkeod")]
+[node name="Player" type="CharacterBody3D" parent="." unique_id=402586009 groups=["player"] instance=ExtResource("5_wkeod")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
 collision_layer = 2
 collision_mask = 31
 floor_constant_speed = true
 
 [node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("5_3eiy4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.110848695, 0.69641, 5.314951)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.4613815, 0.75890434, 0.4719596)
 segments = Array[ExtResource("6_wkeod")]([SubResource("Resource_u3pq0")])
-size = Vector3(6.761448, 0.5, 1.524)
+size = Vector3(11.300825, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
-
-[node name="Box" parent="." unique_id=1373682946 instance=ExtResource("7_wkeod")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.57677484, 1.0280843, 5.332143)
-metadata/hijack_scale = true
