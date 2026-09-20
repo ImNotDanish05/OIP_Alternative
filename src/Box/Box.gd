@@ -20,12 +20,13 @@ extends ResizableNode3D
 static var _material_cache: Dictionary = {}
 
 func _get_shared_material(c: Color) -> StandardMaterial3D:
-	if not _material_cache.has(c):
-		var base: StandardMaterial3D = _mesh_instance_3d.mesh.surface_get_material(0)
-		var mat: StandardMaterial3D = base.duplicate()
+	var base: StandardMaterial3D = _mesh_instance_3d.mesh.surface_get_material(0)
+	var cache_key: String = "%d_%s" % [base.get_instance_id() if base else 0, c.to_html(true)]
+	if not _material_cache.has(cache_key):
+		var mat: StandardMaterial3D = base.duplicate() if base else StandardMaterial3D.new()
 		mat.albedo_color = c
-		_material_cache[c] = mat
-	return _material_cache[c]
+		_material_cache[cache_key] = mat
+	return _material_cache[cache_key]
 
 var _initial_transform: Transform3D
 var _paused: bool = false

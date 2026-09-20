@@ -3,6 +3,10 @@
 [ext_resource type="PackedScene" uid="uid://dyhvoundu2kqc" path="res://parts/Building.tscn" id="1_anvak"]
 [ext_resource type="Script" uid="uid://1it35d0vq4ou" path="res://parts/building_wall_rule.gd" id="3_72sig"]
 [ext_resource type="PackedScene" uid="uid://bp5sxcp134uj2" path="res://parts/Player.tscn" id="4_mep0u"]
+[ext_resource type="PackedScene" uid="uid://dm55h6ap605bw" path="res://parts/BeltConveyor.tscn" id="4_xsryc"]
+[ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="5_u1r1f"]
+[ext_resource type="PackedScene" uid="uid://whs4euv2fp48" path="res://parts/BoxSmallSpawner.tscn" id="6_jtisu"]
+[ext_resource type="PackedScene" uid="uid://5taesto86qec" path="res://parts/BoxLargeSpawner.tscn" id="7_ef0pl"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
 script = ExtResource("3_72sig")
@@ -40,6 +44,12 @@ start = 2
 door_count = 2
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
+[sub_resource type="Resource" id="Resource_hbfqx"]
+resource_local_to_scene = true
+script = ExtResource("5_u1r1f")
+length = 8.123650181626376
+metadata/_belt_conveyor_owner = 1829672920462
+
 [node name="Simulation" type="Node3D" unique_id=1163379344]
 
 [node name="Building" parent="." unique_id=183560046 instance=ExtResource("1_anvak")]
@@ -47,3 +57,18 @@ rules = Array[ExtResource("3_72sig")]([SubResource("Resource_4bf66"), SubResourc
 
 [node name="Player" parent="." unique_id=402586009 instance=ExtResource("4_mep0u")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
+
+[node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("4_xsryc")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.678237, 0.8330933, 7.5495625)
+segments = Array[ExtResource("5_u1r1f")]([SubResource("Resource_hbfqx")])
+size = Vector3(8.623651, 0.5, 1.524)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
+
+[node name="BoxSmallSpawner" parent="." unique_id=1768651968 instance=ExtResource("6_jtisu")]
+transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -6, 2, 7.5)
+metadata/hijack_scale = true
+
+[node name="BoxLargeSpawner" parent="." unique_id=592490908 instance=ExtResource("7_ef0pl")]
+transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -4, 2, 7.5)
+metadata/hijack_scale = true
