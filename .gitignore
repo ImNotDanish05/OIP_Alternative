@@ -16,6 +16,7 @@ oip_data/
 
 #Other
 .vs/
+build/
 
 # Exported application builds and packfiles
 build_app_*
