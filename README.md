@@ -31,6 +31,7 @@ Supported Communication Protocols:
 - [Communications](#communications)
   - [OPC UA Browser](#opc-ua-browser)
   - [Tag Name Format](#tag-name-format)
+  - [OpenPLC Integration & Modbus Simulation](#openplc-integration--modbus-simulation)
 - [Importing Models](#importing-models)
 - [Help Wanted](#help-wanted)
 - [License](#license)
@@ -128,6 +129,32 @@ The Tag Name format depends on the protocol selected for the tag group:
 - **MQTT (`mqtt`)**: The MQTT topic this tag subscribes to and publishes on, e.g. `sensors/temp1` or `factory/line_a/state`. Wildcards (`+`, `#`) are not allowed; each tag is one specific topic. Payloads are interpreted as raw little-endian scalar bytes matching whichever `read_*`/`write_*` API is used (the producer must publish the same byte layout the consumer reads).
 
 The communication API ([OIPComms](https://github.com/Open-Industry-Project/oip-comms)) is contained within a separate GDExtension plugin. Instructions to build and update it are located in its own repository.
+
+### OpenPLC Integration & Modbus Simulation
+
+When connecting Open Industry Project with [OpenPLC](https://openplcproject.com/) via **Modbus TCP**:
+
+#### 1. Important: Sensor (Input) Addressing Rule
+- In standard Modbus protocol, **Discrete Inputs (`di`) are strictly read-only** (Function Code 02).
+- Because simulation sensor nodes (such as `DiffuseSensor`) need to **write** their active detection states into the PLC in real time, they **must be mapped as Coils (`co` / `%QX`)**, rather than `%IX`.
+- Coils support both read & write (Function Codes 01, 05, 15). In OpenPLC Ladder Diagram (LD) or Structured Text (ST), contacts can read `%QX` addresses directly just like inputs.
+
+#### 2. OpenPLC Runtime v4 Configuration
+- **Add Server**: In OpenPLC Editor, ensure a **Modbus/TCP Server** is created, enabled, and listening on port `502`.
+- **Target Device**: Set target board to `OpenPLC Runtime v4` with IP `127.0.0.1` and connect before building and deploying.
+
+#### 3. Belajar_OIP Example Project
+The project at `project/Belajar_OIP` demonstrates a box-sorting conveyor system powered by OpenPLC Ladder Diagram:
+
+| Device | Godot Node | OIP Tag Name | OpenPLC Address | Variable Name | Role |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Main Conveyor** | `BeltConveyor` | `co0` | `%QX0.0` | `DO_ConveyorMain` | Actuator (Output) |
+| **Divert Conveyor** | `BeltConveyor2` | `co1` | `%QX0.1` | `DO_ConveyorDivert` | Actuator (Output) |
+| **Diverter Pusher** | `Pusher` | `co2` | `%QX0.2` | `DO_Pusher` | Actuator (Output) |
+| **Presence Sensor** | `SensorPresence` | `co3` | `%QX0.3` | `DI_SensorPresence` | Sensor (Input to PLC) |
+| **Height Sensor** | `SensorHeight` | `co4` | `%QX0.4` | `DI_SensorHeight` | Sensor (Input to PLC) |
+
+
 
 ## Importing Models
 
