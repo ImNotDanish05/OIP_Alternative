@@ -41,12 +41,39 @@ extends ResizableNode3D
 ## Maximum mass for randomly massed boxes, in kilograms.
 @export_custom(PROPERTY_HINT_NONE, "suffix:kg") var random_mass_max: float = 15.0
 
+var _updating_rate: bool = false
+
+@export_group("Spawn Timing")
+## Initial delay in seconds before the first box spawns after simulation starts.
+@export_custom(PROPERTY_HINT_NONE, "suffix:s") var start_delay: float = 0.0:
+	set(value):
+		if value == null:
+			start_delay = 0.0
+			return
+		start_delay = maxf(0.0, float(value))
+
+## Interval between box spawns in seconds. Changing this automatically updates boxes_per_minute.
+@export_custom(PROPERTY_HINT_NONE, "suffix:s") var spawn_interval: float = 1.33:
+	set(value):
+		spawn_interval = maxf(0.05, value)
+		if not _updating_rate:
+			_updating_rate = true
+			boxes_per_minute = clampi(roundi(60.0 / spawn_interval), 1, 1000)
+			_updating_rate = false
+			notify_property_list_changed()
+
 @export_group("Spawn Rate")
-## Number of boxes spawned per minute (0-1000).
+## Number of boxes spawned per minute (0-1000). Changing this automatically updates spawn_interval.
 @export var boxes_per_minute: int = 45:
 	set(value):
-		value = clamp(value, 0, 1000)
+		value = clampi(value, 0, 1000)
 		boxes_per_minute = value
+		if not _updating_rate:
+			_updating_rate = true
+			if boxes_per_minute > 0:
+				spawn_interval = snappedf(60.0 / float(boxes_per_minute), 0.01)
+			_updating_rate = false
+			notify_property_list_changed()
 
 ## When true, boxes spawn at a fixed rate. When false, spawn times vary randomly.
 @export var fixed_rate: bool = true
@@ -97,17 +124,23 @@ func _physics_process(delta: float) -> void:
 
 	if disable or _conveyor_stopped or not Simulation.is_running() or Simulation.is_paused():
 		return
+
+	if boxes_per_minute <= 0 or spawn_interval <= 0.0:
+		return
 	
 	_scan_interval += delta
 
 	if not _first_spawn_done:
-		_spawn_box()
-		_first_spawn_done = true
-		_spawn_counter += 1
-		_scan_interval = 0.0
+		if _scan_interval >= start_delay:
+			_spawn_box()
+			_first_spawn_done = true
+			_spawn_counter += 1
+			_scan_interval = 0.0
+			_next_spawn_time = spawn_interval * randf_range(0.5, 1.5)
+		return
 
 	if fixed_rate:
-		var time_between: float = 60.0 / float(boxes_per_minute)
+		var time_between: float = spawn_interval
 		if _scan_interval >= time_between:
 			_spawn_box()
 			_scan_interval -= time_between
@@ -118,7 +151,7 @@ func _physics_process(delta: float) -> void:
 			if _spawn_counter >= boxes_per_minute:
 				_reset_spawn_cycle()
 			else:
-				_next_spawn_time = _scan_interval + (60.0 / boxes_per_minute) * randf_range(0.5, 1.5)
+				_next_spawn_time = _scan_interval + spawn_interval * randf_range(0.5, 1.5)
 
 func _spawn_box() -> void:
 	var box := scene.instantiate() as Box
@@ -136,19 +169,18 @@ func _spawn_box() -> void:
 	else:
 		box.mass = mass
 
-	box.rotation = rotation
-	box.position = position
 	box.initial_linear_velocity = initial_linear_velocity
 	box.color = box_color
 	box.instanced = true
 	add_child(box, true)
+	box.global_transform = global_transform
 	box.owner = get_tree().edited_scene_root
 
 func _reset_spawn_cycle() -> void:
 	_scan_interval = 0.0
 	_spawn_counter = 0
 	_first_spawn_done = false
-	_next_spawn_time = (60.0 / boxes_per_minute) * randf_range(0.5, 1.5)
+	_next_spawn_time = spawn_interval * randf_range(0.5, 1.5)
 
 func _change_texture() -> void:
 	if not is_inside_tree():
