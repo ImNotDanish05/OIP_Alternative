@@ -3,8 +3,8 @@
 [ext_resource type="Script" uid="uid://73uj143uilyo" path="res://addons/AMSG/Components/CharacterMovementComponent.gd" id="1_cmc"]
 [ext_resource type="Script" uid="uid://bpfvgikr4qpbb" path="res://addons/AMSG/Components/CameraComponent.gd" id="2_cc"]
 [ext_resource type="Script" uid="uid://boy6it8viv5wh" path="res://src/Player/amsg_capsule_controller.gd" id="3_ctrl"]
-[ext_resource type="Resource" uid="uid://buhjkpv85gdmi" path="res://AMSG_Examples/Character/standing_movement_values.tres" id="4_stand"]
-[ext_resource type="Resource" uid="uid://bo31hnmxahuqb" path="res://AMSG_Examples/Character/crouch_movement_values.tres" id="5_crouch"]
+[ext_resource type="Resource" uid="uid://buhjkpv85gdmi" path="res://addons/AMSG/Character/movement_settings/standing_movement_values.tres" id="4_stand"]
+[ext_resource type="Resource" uid="uid://bo31hnmxahuqb" path="res://addons/AMSG/Character/movement_settings/crouch_movement_values.tres" id="5_crouch"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_main"]
 radius = 0.35

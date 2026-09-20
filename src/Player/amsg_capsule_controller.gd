@@ -2,7 +2,7 @@ extends Node
 class_name AMSGCapsuleController
 
 ## Simplified AMSG input controller for capsule - keeps AMSG movement code but no model/skeleton.
-## Based on AMSG_Examples/Player/PlayerController.gd but stripped of networking/lock/pose-warping dependencies.
+## Based on AMSG PlayerController.gd but stripped of networking/lock/pose-warping dependencies.
 
 @export var character_component: CharacterMovementComponent
 @export var camera_component: CameraComponent
@@ -52,20 +52,20 @@ func _ready() -> void:
 	if flashlight_audio == null:
 		flashlight_audio = get_node_or_null("../SpringArm3D/Camera/FlashlightAudio") as AudioStreamPlayer3D
 
-	# Preload 10 footstep sounds from AMSG_Examples
+	# Preload 10 footstep sounds from addons/AMSG/Character/sfx/footsteps
 	if footstep_sounds.is_empty():
 		for i: int in range(1, 11):
-			var path: String = "res://AMSG_Examples/Character/footstep_sound/footstep%d.wav" % i
+			var path: String = "res://addons/AMSG/Character/sfx/footsteps/footstep%d.wav" % i
 			if ResourceLoader.exists(path):
 				var s: AudioStream = load(path) as AudioStream
 				if s:
 					footstep_sounds.append(s)
 
-	# Preload flashlight sounds from AMSG_Examples
-	if light_on_sound == null and ResourceLoader.exists("res://AMSG_Examples/Player/flashlight/light_on.wav"):
-		light_on_sound = load("res://AMSG_Examples/Player/flashlight/light_on.wav") as AudioStream
-	if light_off_sound == null and ResourceLoader.exists("res://AMSG_Examples/Player/flashlight/light_off.wav"):
-		light_off_sound = load("res://AMSG_Examples/Player/flashlight/light_off.wav") as AudioStream
+	# Preload flashlight sounds from addons/AMSG/Character/sfx/flashlight
+	if light_on_sound == null and ResourceLoader.exists("res://addons/AMSG/Character/sfx/flashlight/light_on.wav"):
+		light_on_sound = load("res://addons/AMSG/Character/sfx/flashlight/light_on.wav") as AudioStream
+	if light_off_sound == null and ResourceLoader.exists("res://addons/AMSG/Character/sfx/flashlight/light_off.wav"):
+		light_off_sound = load("res://addons/AMSG/Character/sfx/flashlight/light_off.wav") as AudioStream
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	# Ensure camera is current and set to First Person initially

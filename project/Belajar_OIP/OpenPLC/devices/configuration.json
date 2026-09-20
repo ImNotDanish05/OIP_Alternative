@@ -4,7 +4,8 @@
   "runtimeIpAddress": "localhost",
   "vendorScreenData": {},
   "vendorScreenDataByBoard": {
-    "OpenPLC Simulator": {}
+    "OpenPLC Simulator": {},
+    "OpenPLC Runtime v4": {}
   },
   "selectedPlatformOptions": {}
 }
