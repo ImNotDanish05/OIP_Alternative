@@ -18,8 +18,6 @@ config/name="Open Industry Project"
 run/main_scene="uid://b4d1734n0up88"
 config/features=PackedStringArray("4.7", "Forward Plus")
 boot_splash/show_image=false
-boot_splash/image=""
-boot_splash/minimum_display_time=0
 run/scene_time_scale=1.0
 
 [autoload]

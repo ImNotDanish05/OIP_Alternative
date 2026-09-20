@@ -1139,7 +1139,8 @@ func _bend_side_guard_collision(mi: MeshInstance3D, joint: BeltPath.Joint,
 		# See SideGuard._update_collision_shape for why these are set.
 		body.disable_mode = StaticBody3D.DISABLE_MODE_MAKE_STATIC
 		body.collision_mask = 8
-		body.ghost_collision_filtering_enabled = true
+		if "ghost_collision_filtering_enabled" in body:
+			body.set("ghost_collision_filtering_enabled", true)
 		var phys := PhysicsMaterial.new()
 		phys.friction = 0.0
 		body.physics_material_override = phys

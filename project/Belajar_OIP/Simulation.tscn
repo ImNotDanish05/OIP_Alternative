@@ -7,6 +7,11 @@
 [ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="5_u1r1f"]
 [ext_resource type="PackedScene" uid="uid://whs4euv2fp48" path="res://parts/BoxSmallSpawner.tscn" id="6_jtisu"]
 [ext_resource type="PackedScene" uid="uid://5taesto86qec" path="res://parts/BoxLargeSpawner.tscn" id="7_ef0pl"]
+[ext_resource type="PackedScene" uid="uid://kdpe7o4ec1fa" path="res://parts/DiffuseSensor.tscn" id="8_hbfqx"]
+[ext_resource type="PackedScene" uid="uid://5pjmdoyiub35" path="res://parts/Diverter.tscn" id="9_enpog"]
+[ext_resource type="PackedScene" uid="uid://ccnjj66g0dynu" path="res://parts/Pallet.tscn" id="10_7bcyd"]
+[ext_resource type="PackedScene" uid="uid://6vu4cx2v1ltg" path="res://parts/CurvedBeltConveyor.tscn" id="11_h6usk"]
+[ext_resource type="PackedScene" uid="uid://bl73u0rvt2orv" path="res://parts/Despawner.tscn" id="12_h6usk"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
 script = ExtResource("3_72sig")
@@ -44,11 +49,22 @@ start = 2
 door_count = 2
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
-[sub_resource type="Resource" id="Resource_jtisu"]
+[sub_resource type="Resource" id="Resource_7bcyd"]
 resource_local_to_scene = true
 script = ExtResource("5_u1r1f")
-length = 10.291400773178545
-metadata/_belt_conveyor_owner = 7564645447332
+length = 10.438197902648056
+metadata/_belt_conveyor_owner = 1780599563762
+
+[sub_resource type="Resource" id="Resource_h6usk"]
+resource_local_to_scene = true
+script = ExtResource("5_u1r1f")
+metadata/_belt_conveyor_owner = 1780700227062
+
+[sub_resource type="Resource" id="Resource_p3786"]
+resource_local_to_scene = true
+script = ExtResource("5_u1r1f")
+length = 3.17705575393161
+metadata/_belt_conveyor_owner = 1782411503185
 
 [node name="Simulation" type="Node3D" unique_id=1163379344]
 
@@ -56,19 +72,18 @@ metadata/_belt_conveyor_owner = 7564645447332
 rules = Array[ExtResource("3_72sig")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])
 
 [node name="Player" parent="." unique_id=402586009 instance=ExtResource("4_mep0u")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 22.647009)
 
-[node name="Node3D" type="Node3D" parent="." unique_id=2121763690]
+[node name="Spawner" type="Node3D" parent="." unique_id=2121763690]
 transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -6, 2, 7.5)
 
-[node name="BoxSmallSpawner" parent="Node3D" unique_id=1768651968 instance=ExtResource("6_jtisu")]
+[node name="BoxSmallSpawner" parent="Spawner" unique_id=1768651968 instance=ExtResource("6_jtisu")]
 transform = Transform3D(1, -8.239927e-18, 0, -8.239927e-18, 1, 0, 0, 0, 1, 0, 0, 0)
-start_delay = 0.0
 spawn_interval = 2.0
 boxes_per_minute = 30
 metadata/hijack_scale = true
 
-[node name="BoxLargeSpawner" parent="Node3D" unique_id=592490908 instance=ExtResource("7_ef0pl")]
+[node name="BoxLargeSpawner" parent="Spawner" unique_id=592490908 instance=ExtResource("7_ef0pl")]
 transform = Transform3D(1, -8.239927e-18, 0, -8.239927e-18, 1, 0, 0, 0, 1, 0, 0, 0)
 start_delay = 1.0
 spawn_interval = 2.0
@@ -77,7 +92,54 @@ metadata/hijack_scale = true
 
 [node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("4_xsryc")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.860801, 1.0423521, 7.5103045)
-segments = Array[ExtResource("5_u1r1f")]([SubResource("Resource_jtisu")])
-size = Vector3(10.791401, 0.5, 1.524)
+segments = Array[ExtResource("5_u1r1f")]([SubResource("Resource_7bcyd")])
+size = Vector3(10.938198, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
+
+[node name="BeltConveyor2" parent="." unique_id=1506468868 instance=ExtResource("4_xsryc")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -0.23345613, 1.0423521, 6.4983044)
+segments = Array[ExtResource("5_u1r1f")]([SubResource("Resource_h6usk")])
+size = Vector3(4.5, 0.5, 1.524)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
+
+[node name="DiffuseSensor" parent="." unique_id=1915908865 instance=ExtResource("8_hbfqx")]
+transform = Transform3D(-0.173913, 0, 0, 0, 0.173913, 0, 0, 0, -0.173913, -0.47372907, 1.075918, 8.365349)
+max_range = 1.5640001678466795
+metadata/_snap_transform = Callable()
+
+[node name="DiffuseSensor2" parent="." unique_id=1579059195 instance=ExtResource("8_hbfqx")]
+transform = Transform3D(-0.173913, 0, 0, 0, 0.173913, 0, 0, 0, -0.173913, -0.47372907, 1.4639219, 8.365349)
+max_range = 1.5640001678466795
+metadata/_snap_transform = Callable()
+
+[node name="Diverter" parent="." unique_id=1865443018 instance=ExtResource("9_enpog")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.19737542, 0.8423521, 9.385805)
+metadata/_snap_transform = Callable()
+
+[node name="Pallet" parent="." unique_id=528981788 instance=ExtResource("10_7bcyd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.25530213, 0.0001364606, 1.8042641)
+
+[node name="Pallet" parent="Pallet" unique_id=9942559 instance=ExtResource("10_7bcyd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8981907, 0.0001364606, 1.8042641)
+
+[node name="CurvedBeltConveyor" parent="." unique_id=576074511 instance=ExtResource("11_h6usk")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 2.6807761, 1.0423521, 6.2483044)
+reverse = true
+size = Vector3(4.048, 0.5, 4.048)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
+
+[node name="BeltConveyor3" parent="." unique_id=270406421 instance=ExtResource("4_xsryc")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 3.9427762, 1.0423521, 5.7483044)
+segments = Array[ExtResource("5_u1r1f")]([SubResource("Resource_p3786")])
+size = Vector3(3.6770558, 0.5, 1.524)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
+
+[node name="Despawner" parent="." unique_id=1495546615 instance=ExtResource("12_h6usk")]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 3.8505452, 0.6324489, 1.912595)
+
+[node name="Despawner2" parent="." unique_id=2130048734 instance=ExtResource("12_h6usk")]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, -0.39529818, 0.6324489, 1.912595)

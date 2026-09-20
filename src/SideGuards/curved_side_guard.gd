@@ -82,7 +82,8 @@ func _ensure_nodes() -> void:
 			# See SideGuard._update_collision_shape for rationale.
 			_body.disable_mode = StaticBody3D.DISABLE_MODE_MAKE_STATIC
 			_body.collision_mask = 8
-			_body.ghost_collision_filtering_enabled = true
+			if "ghost_collision_filtering_enabled" in _body:
+				_body.set("ghost_collision_filtering_enabled", true)
 			var phys := PhysicsMaterial.new()
 			phys.friction = 0.0
 			_body.physics_material_override = phys
