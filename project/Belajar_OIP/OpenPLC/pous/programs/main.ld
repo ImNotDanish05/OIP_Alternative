@@ -1,7 +1,7 @@
 PROGRAM main
   VAR
-    DI_SensorPresence : BOOL AT %IX0.0;
-    DI_SensorHeight : BOOL AT %IX0.1;
+    DI_SensorPresence : BOOL AT %QX0.3;
+    DI_SensorHeight : BOOL AT %QX0.4;
     DO_ConveyorMain : BOOL AT %QX0.0;
     DO_ConveyorDivert : BOOL AT %QX0.1;
     DO_Pusher : BOOL AT %QX0.2;

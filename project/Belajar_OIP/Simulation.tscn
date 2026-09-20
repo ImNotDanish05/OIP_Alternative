@@ -116,7 +116,7 @@ transform = Transform3D(-0.173913, 0, 0, 0, 0.173913, 0, 0, 0, -0.173913, -0.890
 max_range = 1.5640001678466795
 enable_comms = true
 tag_group_name = "OpenPLC"
-tag_name = "di0"
+tag_name = "co3"
 metadata/_snap_transform = Callable()
 
 [node name="SensorHeight" parent="." unique_id=1579059195 instance=ExtResource("8_hbfqx")]
@@ -124,7 +124,7 @@ transform = Transform3D(-0.173913, 0, 0, 0, 0.173913, 0, 0, 0, -0.173913, -0.890
 max_range = 1.5640001678466795
 enable_comms = true
 tag_group_name = "OpenPLC"
-tag_name = "di1"
+tag_name = "co4"
 metadata/_snap_transform = Callable()
 
 [node name="Pusher" parent="." unique_id=1865443018 instance=ExtResource("9_enpog")]
