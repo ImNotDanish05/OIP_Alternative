@@ -119,7 +119,7 @@ metadata/_snap_transform = Callable()
 transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 3.7961335, 12.669698, 0.50000024, 1.1264338)
 
 [node name="Computer" parent="." unique_id=1988223311 instance=ExtResource("10_cmptr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1, 2.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.2514601, 2.6)
 title = "BOX COUNTER"
 enable_comms = true
 trigger_tag_group_name = "OpenPLC"
