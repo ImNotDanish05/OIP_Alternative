@@ -20,7 +20,7 @@ extends Node3D
 ## Current measured distance to detected object (read-only).
 @export_custom(PROPERTY_HINT_NONE, "suffix:m") var distance: float = max_range:
 	set(value):
-		if _tag.is_ready() and value != distance:
+		if _tag != null and _tag.is_ready() and value != distance:
 			_tag.write_float32(value)
 		distance = value
 
@@ -165,10 +165,10 @@ static func _disable_collisions_recursive(node: Node) -> void:
 
 
 func _on_simulation_started() -> void:
-	if enable_comms:
+	if enable_comms and _tag != null and not tag_name.is_empty():
 		_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_FLOAT32)
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if _tag.on_group_initialized(tag_group_name_param):
+	if _tag != null and not tag_name.is_empty() and _tag.on_group_initialized(tag_group_name_param):
 		_tag.write_float32(distance)

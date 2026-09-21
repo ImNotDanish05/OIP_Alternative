@@ -30,7 +30,7 @@ extends Fence
 ## Final output signal after applying normally_closed logic (read-only).
 @export var output: bool = false:
 	set(value):
-		if _gate_tag.is_ready() and value != output:
+		if _gate_tag != null and _gate_tag.is_ready() and value != output:
 			_gate_tag.write_bit(value)
 		output = value
 
@@ -151,12 +151,12 @@ func _update_output() -> void:
 
 
 func _on_simulation_started() -> void:
-	if enable_comms:
+	if enable_comms and _gate_tag != null and not gate_tag_name.is_empty():
 		_gate_tag.register(gate_tag_group_name, gate_tag_name, OIPComms.TAG_TYPE_BOOL)
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if _gate_tag.on_group_initialized(tag_group_name_param):
+	if _gate_tag != null and not gate_tag_name.is_empty() and _gate_tag.on_group_initialized(tag_group_name_param):
 		_gate_tag.write_bit(output)
 
 

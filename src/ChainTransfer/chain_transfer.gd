@@ -190,8 +190,10 @@ func _on_simulation_started() -> void:
 			base.turn_on()
 
 	if enable_comms:
-		_speed_tag.register(speed_tag_group_name, speed_tag_name, OIPComms.TAG_TYPE_FLOAT32)
-		_popup_tag.register(popup_tag_group_name, popup_tag_name, OIPComms.TAG_TYPE_BOOL)
+		if _speed_tag != null and not speed_tag_name.is_empty():
+			_speed_tag.register(speed_tag_group_name, speed_tag_name, OIPComms.TAG_TYPE_FLOAT32)
+		if _popup_tag != null and not popup_tag_name.is_empty():
+			_popup_tag.register(popup_tag_group_name, popup_tag_name, OIPComms.TAG_TYPE_BOOL)
 
 func _on_simulation_ended() -> void:
 	if chain_transfer_bases:
@@ -243,14 +245,16 @@ func _update_simple_shape() -> void:
 		)
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	_speed_tag.on_group_initialized(tag_group_name_param)
-	_popup_tag.on_group_initialized(tag_group_name_param)
+	if _speed_tag != null and not speed_tag_name.is_empty():
+		_speed_tag.on_group_initialized(tag_group_name_param)
+	if _popup_tag != null and not popup_tag_name.is_empty():
+		_popup_tag.on_group_initialized(tag_group_name_param)
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
 	if not enable_comms:
 		return
 
-	if _speed_tag.matches_group(tag_group_name_param):
+	if _speed_tag != null and not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param) and _speed_tag.is_ready():
 		speed = _speed_tag.read_float32()
-	if _popup_tag.matches_group(tag_group_name_param):
+	if _popup_tag != null and not popup_tag_name.is_empty() and _popup_tag.matches_group(tag_group_name_param) and _popup_tag.is_ready():
 		popup_chains = _popup_tag.read_bit()

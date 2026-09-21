@@ -23,7 +23,7 @@ extends Node3D
 		else:
 			color_value = 0
 
-		if _tag.is_ready():
+		if _tag != null and _tag.is_ready():
 			_tag.write_int32(color_value)
 
 ## Maps detected colors to integer values for PLC communication.
@@ -36,7 +36,7 @@ extends Node3D
 ## Integer value corresponding to detected color from color_map (read-only).
 @export var color_value: int = 0:
 	set(value):
-		if _tag.is_ready() and value != color_value:
+		if _tag != null and _tag.is_ready() and value != color_value:
 			_tag.write_int32(value)
 		color_value = value
 
@@ -189,10 +189,10 @@ static func _disable_collisions_recursive(node: Node) -> void:
 
 
 func _on_simulation_started() -> void:
-	if enable_comms:
+	if enable_comms and _tag != null and not tag_name.is_empty():
 		_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_INT32)
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if _tag.on_group_initialized(tag_group_name_param):
+	if _tag != null and not tag_name.is_empty() and _tag.on_group_initialized(tag_group_name_param):
 		_tag.write_int32(color_value)

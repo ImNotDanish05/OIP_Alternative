@@ -56,3 +56,14 @@ static func disconnect_comms(
 	if polled.is_valid():
 		OIPComms.tag_group_polled.disconnect(polled)
 	OIPComms.enable_comms_changed.disconnect(node.notify_property_list_changed)
+
+
+static func is_tag_group_initialized(group_name: String) -> bool:
+	if Engine.has_singleton("OIPComms"):
+		var native: Object = Engine.get_singleton("OIPComms")
+		if native != null and native.has_method("is_tag_group_initialized"):
+			return bool(native.call("is_tag_group_initialized", group_name))
+	var fallback_script: Script = load("res://src/comms/oip_comms_fallback.gd")
+	if fallback_script != null and fallback_script.has_method("is_tag_group_initialized"):
+		return bool(fallback_script.call("is_tag_group_initialized", group_name))
+	return group_name in OIPComms.get_tag_groups()

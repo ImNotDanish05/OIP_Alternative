@@ -32,7 +32,7 @@ extends Node3D
 ## Final output signal after applying normally_closed logic (read-only).
 @export var output: bool = false:
 	set(value):
-		if _tag.is_ready() and value != output:
+		if _tag != null and _tag.is_ready() and value != output:
 			_tag.write_bit(value)
 		output = value
 
@@ -185,12 +185,12 @@ func _update_output() -> void:
 
 
 func _on_simulation_started() -> void:
-	if enable_comms:
+	if enable_comms and _tag != null and not tag_name.is_empty():
 		_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_BOOL)
 		if _tag.is_ready():
 			_tag.write_bit(output)
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if _tag.on_group_initialized(tag_group_name_param):
+	if _tag != null and not tag_name.is_empty() and _tag.on_group_initialized(tag_group_name_param):
 		_tag.write_bit(output)

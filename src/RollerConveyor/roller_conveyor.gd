@@ -68,7 +68,7 @@ signal roller_override_material_changed(material: Material)
 		speed_changed.emit(value)
 		_update_conveyor_velocity()
 
-		if _running_tag.is_ready():
+		if _running_tag != null and _running_tag.is_ready():
 			_running_tag.write_bit(value != 0.0)
 
 ## Physics material applied to the conveyor body.
@@ -700,13 +700,15 @@ func _on_simulation_started() -> void:
 	running = true
 	_update_conveyor_velocity()
 	if enable_comms:
-		_speed_tag.register(speed_tag_group_name, speed_tag_name, OIPComms.TAG_TYPE_FLOAT32)
-		_running_tag.register(running_tag_group_name, running_tag_name, OIPComms.TAG_TYPE_BOOL)
+		if _speed_tag != null and not speed_tag_name.is_empty():
+			_speed_tag.register(speed_tag_group_name, speed_tag_name, OIPComms.TAG_TYPE_FLOAT32)
+		if _running_tag != null and not running_tag_name.is_empty():
+			_running_tag.register(running_tag_group_name, running_tag_name, OIPComms.TAG_TYPE_BOOL)
 
 
 func _on_simulation_ended() -> void:
 	running = false
-	if _running_tag.is_ready():
+	if _running_tag != null and _running_tag.is_ready():
 		_running_tag.write_bit(false)
 	_update_conveyor_velocity()
 	if _roller_material:
@@ -714,15 +716,17 @@ func _on_simulation_ended() -> void:
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	_speed_tag.on_group_initialized(tag_group_name_param)
-	_running_tag.on_group_initialized(tag_group_name_param)
+	if _speed_tag != null and not speed_tag_name.is_empty():
+		_speed_tag.on_group_initialized(tag_group_name_param)
+	if _running_tag != null and not running_tag_name.is_empty():
+		_running_tag.on_group_initialized(tag_group_name_param)
 
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
 	if not enable_comms:
 		return
 
-	if _speed_tag.matches_group(tag_group_name_param):
+	if _speed_tag != null and not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param) and _speed_tag.is_ready():
 		speed = _speed_tag.read_float32()
 
 

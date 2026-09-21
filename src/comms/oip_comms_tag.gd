@@ -11,7 +11,7 @@ func register(group: String, tag: String, data_type: int = OIPComms.TAG_TYPE_BOO
 	tag_group_name = group
 	tag_name = tag
 	_register_ok = OIPComms.register_tag(tag_group_name, tag_name, data_type)
-	if OIPComms.is_tag_group_initialized(tag_group_name):
+	if OIPCommsSetup.is_tag_group_initialized(tag_group_name):
 		_group_init = true
 
 
@@ -23,7 +23,7 @@ func on_group_initialized(group: String) -> bool:
 
 
 func is_ready() -> bool:
-	if not _group_init and OIPComms.is_tag_group_initialized(tag_group_name):
+	if not _group_init and OIPCommsSetup.is_tag_group_initialized(tag_group_name):
 		_group_init = true
 	return _register_ok and _group_init
 

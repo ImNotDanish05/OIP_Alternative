@@ -106,14 +106,14 @@ func _physics_process(_delta: float) -> void:
 	_diverter_animator.set_target(_diverted, divert_time, divert_distance)
 
 func _on_simulation_started() -> void:
-	if enable_comms:
+	if enable_comms and _tag != null and not tag_name.is_empty():
 		_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_BOOL)
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if _tag.on_group_initialized(tag_group_name_param):
+	if _tag != null and _tag.on_group_initialized(tag_group_name_param):
 		_tag.write_bit(_diverted)
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
-	if not enable_comms or not _tag.matches_group(tag_group_name_param):
+	if not enable_comms or _tag == null or not _tag.matches_group(tag_group_name_param) or not _tag.is_ready():
 		return
 	_diverted = _tag.read_bit()

@@ -1,5 +1,11 @@
 @tool
-class_name OIPComms
+# OIPCommsFallback: Pure GDScript adapter/bridge for OIPComms.
+# When the native C++ GDExtension is loaded (Windows/Linux), this script
+# automatically delegates all calls to the native singleton via
+# Engine.get_singleton("OIPComms"). When no native is present, it
+# provides a pure GDScript ModbusClient fallback.
+# NOTE: Do NOT add class_name OIPComms here — the native C++ GDExtension
+# already registers that class name as a native type on all platforms.
 extends Node
 
 const TAG_TYPE_BOOL: int = 0
@@ -15,7 +21,7 @@ signal tag_group_polled_signal(group_name: String)
 signal comms_error_signal
 signal enable_comms_changed_signal
 
-static var _instance: OIPComms = null
+static var _instance: Node = null
 static var _enable_comms: bool = false
 static var _enable_log: bool = false
 static var _sim_running: bool = false
@@ -51,8 +57,10 @@ static var enable_comms_changed: Signal:
 
 static func _ensure_instance() -> void:
 	if _instance == null or not is_instance_valid(_instance):
-		_instance = OIPComms.new()
-		_instance.name = "OIPComms"
+		# Load the fallback script to instantiate it (avoids using class_name OIPComms)
+		var fallback_script: Script = load("res://src/comms/oip_comms_fallback.gd")
+		_instance = fallback_script.new()
+		_instance.name = "OIPCommsFallback"
 		_instance._hook_native()
 		var tree: SceneTree = Engine.get_main_loop() as SceneTree
 		if tree and tree.root:
@@ -81,23 +89,23 @@ func _hook_native() -> void:
 
 
 func _on_native_tag_groups_registered() -> void:
-	tag_groups_registered_signal.emit()
+	tag_groups_registered_signal.emit.call_deferred()
 
 
 func _on_native_tag_group_initialized(group_name: String) -> void:
-	tag_group_initialized_signal.emit(group_name)
+	tag_group_initialized_signal.emit.call_deferred(group_name)
 
 
 func _on_native_tag_group_polled(group_name: String) -> void:
-	tag_group_polled_signal.emit(group_name)
+	tag_group_polled_signal.emit.call_deferred(group_name)
 
 
 func _on_native_comms_error() -> void:
-	comms_error_signal.emit()
+	comms_error_signal.emit.call_deferred()
 
 
 func _on_native_enable_comms_changed() -> void:
-	enable_comms_changed_signal.emit()
+	enable_comms_changed_signal.emit.call_deferred()
 
 
 static func register_tag_group(group_name: String, polling_rate: int, protocol: String, gateway: String, path: String, cpu: String) -> void:

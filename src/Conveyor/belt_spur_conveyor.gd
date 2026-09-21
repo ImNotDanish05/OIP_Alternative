@@ -63,7 +63,7 @@ const _GAP_FILL_DEPTH: float = 0.05
 			_target_speed = value
 		if _belt_material:
 			_belt_material.set_shader_parameter("Scale", maxf(1.0, _approximate_loop_length()))
-		if _running_tag.is_ready() and (not enable_comms or running_tag_name.is_empty()):
+		if _running_tag != null and _running_tag.is_ready() and (not enable_comms or running_tag_name.is_empty()):
 			_running_tag.write_bit(value != 0.0)
 
 @export var belt_color: Color = Color.WHITE:
@@ -1029,7 +1029,7 @@ func _on_simulation_started() -> void:
 
 
 func _on_simulation_ended() -> void:
-	if _running_tag.is_ready() and (not enable_comms or running_tag_name.is_empty()):
+	if _running_tag != null and _running_tag.is_ready() and (not enable_comms or running_tag_name.is_empty()):
 		_running_tag.write_bit(false)
 	_belt_position = 0.0
 	if _belt_material:
@@ -1039,9 +1039,9 @@ func _on_simulation_ended() -> void:
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if not speed_tag_name.is_empty():
+	if _speed_tag != null and not speed_tag_name.is_empty():
 		_speed_tag.on_group_initialized(tag_group_name_param)
-	if not running_tag_name.is_empty():
+	if _running_tag != null and not running_tag_name.is_empty():
 		_running_tag.on_group_initialized(tag_group_name_param)
 
 
@@ -1049,13 +1049,13 @@ func _tag_group_polled(tag_group_name_param: String) -> void:
 	if not enable_comms:
 		return
 	var base: float = _target_speed
-	if not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param) and _speed_tag.is_ready():
+	if _speed_tag != null and not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param) and _speed_tag.is_ready():
 		base = _speed_tag.read_float32()
 		_target_speed = base
-	if not running_tag_name.is_empty() and _running_tag.matches_group(tag_group_name_param) and _running_tag.is_ready():
+	if _running_tag != null and not running_tag_name.is_empty() and _running_tag.matches_group(tag_group_name_param) and _running_tag.is_ready():
 		var is_on: bool = _running_tag.read_bit()
 		speed = base if is_on else 0.0
-	elif not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param):
+	elif _speed_tag != null and not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param):
 		speed = base
 
 

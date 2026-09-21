@@ -737,21 +737,25 @@ func _on_simulation_started() -> void:
 
 	_last_execute = false
 
-	if not command_tag.is_empty():
+	if not command_tag.is_empty() and _command_tag != null:
 		_command_tag.register(tag_group_name, command_tag, OIPComms.TAG_TYPE_INT16)
-	if not execute_tag.is_empty():
+	if not execute_tag.is_empty() and _execute_tag != null:
 		_execute_tag.register(tag_group_name, execute_tag, OIPComms.TAG_TYPE_BOOL)
-	if not done_tag.is_empty():
+	if not done_tag.is_empty() and _done_tag != null:
 		_done_tag.register(tag_group_name, done_tag, OIPComms.TAG_TYPE_BOOL)
-	if not vacuum_tag.is_empty():
+	if not vacuum_tag.is_empty() and _vacuum_tag != null:
 		_vacuum_tag.register(tag_group_name, vacuum_tag, OIPComms.TAG_TYPE_BOOL)
 
 
 func _tag_group_initialized(group_name: String) -> void:
-	_command_tag.on_group_initialized(group_name)
-	_execute_tag.on_group_initialized(group_name)
-	_done_tag.on_group_initialized(group_name)
-	_vacuum_tag.on_group_initialized(group_name)
+	if _command_tag != null and not command_tag.is_empty():
+		_command_tag.on_group_initialized(group_name)
+	if _execute_tag != null and not execute_tag.is_empty():
+		_execute_tag.on_group_initialized(group_name)
+	if _done_tag != null and not done_tag.is_empty():
+		_done_tag.on_group_initialized(group_name)
+	if _vacuum_tag != null and not vacuum_tag.is_empty():
+		_vacuum_tag.on_group_initialized(group_name)
 	_write_status_tags()
 
 
@@ -759,10 +763,10 @@ func _tag_group_polled(group_name: String) -> void:
 	if group_name != tag_group_name:
 		return
 
-	if _vacuum_tag.is_ready():
+	if _vacuum_tag != null and not vacuum_tag.is_empty() and _vacuum_tag.is_ready():
 		vacuum_on = _vacuum_tag.read_bit()
 
-	if _execute_tag.is_ready():
+	if _execute_tag != null and not execute_tag.is_empty() and _execute_tag.is_ready():
 		var execute := _execute_tag.read_bit()
 		var rising_edge := execute and not _last_execute
 		_last_execute = execute
@@ -774,7 +778,7 @@ func _tag_group_polled(group_name: String) -> void:
 
 
 func _execute_command() -> void:
-	if not _command_tag.is_ready():
+	if _command_tag == null or command_tag.is_empty() or not _command_tag.is_ready():
 		return
 
 	var cmd: int = _command_tag.read_int16()
@@ -791,5 +795,5 @@ func _execute_command() -> void:
 
 
 func _write_status_tags() -> void:
-	if _done_tag.is_ready():
+	if _done_tag != null and not done_tag.is_empty() and _done_tag.is_ready():
 		_done_tag.write_bit(not _is_moving)

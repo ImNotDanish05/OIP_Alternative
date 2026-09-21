@@ -395,11 +395,11 @@ func _on_segment_state_changed(index: int, active: bool) -> void:
 
 
 func _on_simulation_started() -> void:
-	if enable_comms:
+	if enable_comms and _tag != null and not tag_name.is_empty():
 		_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_UINT8)
 
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
-	if not enable_comms or not _tag.matches_group(tag_group_name_param):
+	if not enable_comms or _tag == null or not _tag.matches_group(tag_group_name_param) or not _tag.is_ready():
 		return
 	light_value = _tag.read_uint8()

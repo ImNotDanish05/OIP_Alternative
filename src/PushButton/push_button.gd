@@ -43,7 +43,7 @@ extends Node3D
 ## Final output signal after applying normally_closed logic (read-only).
 @export var output: bool = false:
 	set(value):
-		if _pushbutton_tag.is_ready() and value != output:
+		if _pushbutton_tag != null and _pushbutton_tag.is_ready() and value != output:
 			_pushbutton_tag.write_bit(value)
 		output = value
 
@@ -158,19 +158,22 @@ func _update_output() -> void:
 
 func _on_simulation_started() -> void:
 	if enable_comms:
-		_pushbutton_tag.register(pushbutton_tag_group_name, pushbutton_tag_name, OIPComms.TAG_TYPE_BOOL)
-		_lamp_tag.register(lamp_tag_group_name, lamp_tag_name, OIPComms.TAG_TYPE_BOOL)
+		if _pushbutton_tag != null and not pushbutton_tag_name.is_empty():
+			_pushbutton_tag.register(pushbutton_tag_group_name, pushbutton_tag_name, OIPComms.TAG_TYPE_BOOL)
+		if _lamp_tag != null and not lamp_tag_name.is_empty():
+			_lamp_tag.register(lamp_tag_group_name, lamp_tag_name, OIPComms.TAG_TYPE_BOOL)
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	if _pushbutton_tag.on_group_initialized(tag_group_name_param):
+	if _pushbutton_tag != null and not pushbutton_tag_name.is_empty() and _pushbutton_tag.on_group_initialized(tag_group_name_param):
 		_pushbutton_tag.write_bit(output)
-	_lamp_tag.on_group_initialized(tag_group_name_param)
+	if _lamp_tag != null and not lamp_tag_name.is_empty():
+		_lamp_tag.on_group_initialized(tag_group_name_param)
 
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
 	if not enable_comms:
 		return
 
-	if _lamp_tag.matches_group(tag_group_name_param):
+	if _lamp_tag != null and not lamp_tag_name.is_empty() and _lamp_tag.matches_group(tag_group_name_param) and _lamp_tag.is_ready():
 		lamp = _lamp_tag.read_bit()
