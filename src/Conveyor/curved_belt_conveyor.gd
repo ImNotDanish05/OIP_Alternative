@@ -108,9 +108,11 @@ func _on_size_changed() -> void:
 		if value == speed:
 			return
 		speed = value
+		if value != 0.0:
+			_target_speed = value
 		_recalculate_speeds()
 		_update_belt_material_scale()
-		if _running_tag.is_ready():
+		if _running_tag.is_ready() and (not enable_comms or running_tag_name.is_empty()):
 			_running_tag.write_bit(value != 0.0)
 
 ## Distance from outer edge where [member speed] is measured.
@@ -301,6 +303,7 @@ var _end_body2: StaticBody3D
 
 var _mesh_regeneration_needed: bool = true
 
+var _target_speed: float = 2.0
 var _speed_tag := OIPCommsTag.new()
 var _running_tag := OIPCommsTag.new()
 @export_category("Communications")
@@ -1068,15 +1071,21 @@ func _update_belt_material_scale() -> void:
 
 
 func _on_simulation_started() -> void:
+	if _target_speed == 0.0 and speed != 0.0:
+		_target_speed = speed
+	elif _target_speed == 0.0:
+		_target_speed = 2.0
 	_update_belt_ends()
 
 	if enable_comms:
-		_speed_tag.register(speed_tag_group_name, speed_tag_name, OIPComms.TAG_TYPE_FLOAT32)
-		_running_tag.register(running_tag_group_name, running_tag_name, OIPComms.TAG_TYPE_BOOL)
+		if not speed_tag_name.is_empty():
+			_speed_tag.register(speed_tag_group_name, speed_tag_name, OIPComms.TAG_TYPE_FLOAT32)
+		if not running_tag_name.is_empty():
+			_running_tag.register(running_tag_group_name, running_tag_name, OIPComms.TAG_TYPE_BOOL)
 
 
 func _on_simulation_ended() -> void:
-	if _running_tag.is_ready():
+	if _running_tag.is_ready() and (not enable_comms or running_tag_name.is_empty()):
 		_running_tag.write_bit(false)
 	_belt_position = 0.0
 	if _belt_material and _belt_material is ShaderMaterial:
@@ -1090,13 +1099,30 @@ func _on_simulation_ended() -> void:
 
 
 func _tag_group_initialized(tag_group_name_param: String) -> void:
-	_speed_tag.on_group_initialized(tag_group_name_param)
-	_running_tag.on_group_initialized(tag_group_name_param)
+	if not speed_tag_name.is_empty():
+		_speed_tag.on_group_initialized(tag_group_name_param)
+	if not running_tag_name.is_empty():
+		_running_tag.on_group_initialized(tag_group_name_param)
 
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
 	if not enable_comms:
 		return
 
-	if _speed_tag.matches_group(tag_group_name_param):
-		speed = _speed_tag.read_float32()
+	var base: float = _target_speed
+	if not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param) and _speed_tag.is_ready():
+		base = _speed_tag.read_float32()
+		_target_speed = base
+	if not running_tag_name.is_empty() and _running_tag.matches_group(tag_group_name_param) and _running_tag.is_ready():
+		var is_on: bool = _running_tag.read_bit()
+		_apply_comms_speed(base if is_on else 0.0)
+	elif not speed_tag_name.is_empty() and _speed_tag.matches_group(tag_group_name_param):
+		_apply_comms_speed(base)
+
+
+func _apply_comms_speed(new_speed: float) -> void:
+	if speed == new_speed:
+		return
+	speed = new_speed
+	_recalculate_speeds()
+	_update_belt_material_scale()

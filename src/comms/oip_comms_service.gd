@@ -91,4 +91,4 @@ func _on_simulation_ended() -> void:
 
 
 func _on_comms_error() -> void:
-	Simulation.stop()
+	push_warning("OIPComms: Communication error on PLC tag group. Check network/PLC connection.")
