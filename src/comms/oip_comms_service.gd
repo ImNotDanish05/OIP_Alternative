@@ -86,6 +86,14 @@ func _apply_settings() -> void:
 
 func _on_simulation_started() -> void:
 	OIPComms.set_sim_running(true)
+	_notify_groups_initialized.call_deferred()
+
+
+func _notify_groups_initialized() -> void:
+	for group: Dictionary in _load_tag_groups():
+		var group_name: String = str(group.get("name", ""))
+		if OIPComms.is_tag_group_initialized(group_name):
+			OIPComms.tag_group_initialized.emit(group_name)
 
 
 func _on_simulation_ended() -> void:

@@ -21,6 +21,7 @@ static var _enable_log: bool = false
 static var _sim_running: bool = false
 static var _tag_groups: Array = []
 static var _tag_values: Dictionary = {}
+static var _modbus_clients: Dictionary = {}
 
 static var tag_groups_registered: Signal:
 	get:
@@ -53,6 +54,9 @@ static func _ensure_instance() -> void:
 		_instance = OIPComms.new()
 		_instance.name = "OIPComms"
 		_instance._hook_native()
+		var tree: SceneTree = Engine.get_main_loop() as SceneTree
+		if tree and tree.root:
+			tree.root.add_child.call_deferred(_instance)
 
 
 func _enter_tree() -> void:
@@ -111,7 +115,35 @@ static func register_tag_group(group_name: String, polling_rate: int, protocol: 
 		"path": path,
 		"cpu": cpu
 	})
-	_instance.tag_group_initialized_signal.emit(group_name)
+
+	if protocol == "modbus_tcp":
+		var client: ModbusClient = _modbus_clients.get(group_name)
+		if client == null:
+			client = ModbusClient.new()
+			client.name = "ModbusClient_" + group_name
+			_modbus_clients[group_name] = client
+			if _instance.is_inside_tree():
+				_instance.add_child(client)
+			else:
+				_instance.add_child.call_deferred(client)
+
+			client.connected_to_plc.connect(func(g: String) -> void:
+				_instance.tag_group_initialized_signal.emit(g)
+			)
+			client.tags_polled.connect(func(g: String) -> void:
+				_instance.tag_group_polled_signal.emit(g)
+			)
+			client.disconnected_from_plc.connect(func(_g: String) -> void:
+				_instance.comms_error_signal.emit()
+			)
+
+		client.group_name = group_name
+		client.host = gateway
+		client.unit_id = path.to_int() if not path.is_empty() else 1
+		client.polling_rate_ms = polling_rate
+		client.connect_to_plc()
+	else:
+		_instance.tag_group_initialized_signal.emit(group_name)
 
 
 static func clear_tag_groups() -> void:
@@ -123,6 +155,26 @@ static func clear_tag_groups() -> void:
 			return
 	_tag_groups.clear()
 	_tag_values.clear()
+	for client: ModbusClient in _modbus_clients.values():
+		if is_instance_valid(client):
+			client.disconnect_from_plc()
+			client.queue_free()
+	_modbus_clients.clear()
+
+
+static func is_tag_group_initialized(group_name: String) -> bool:
+	_ensure_instance()
+	if Engine.has_singleton("OIPComms"):
+		var native: Object = Engine.get_singleton("OIPComms")
+		if native != _instance and native.has_method("is_tag_group_initialized"):
+			return bool(native.call("is_tag_group_initialized", group_name))
+	var client: ModbusClient = _modbus_clients.get(group_name)
+	if client != null:
+		return client.is_connected_to_plc()
+	for g: Dictionary in _tag_groups:
+		if str(g.get("name", "")) == group_name:
+			return true
+	return false
 
 
 static func register_tag(group: String, tag: String, data_type: int = TAG_TYPE_BOOL) -> bool:
@@ -138,6 +190,11 @@ static func register_tag(group: String, tag: String, data_type: int = TAG_TYPE_B
 			TAG_TYPE_INT16, TAG_TYPE_INT32, TAG_TYPE_UINT8: _tag_values[key] = 0
 			TAG_TYPE_FLOAT32, TAG_TYPE_FLOAT64: _tag_values[key] = 0.0
 			_: _tag_values[key] = 0
+
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		client.register_tag(tag, data_type)
+
 	return true
 
 
@@ -146,6 +203,9 @@ static func read_bit(group: String, tag: String) -> bool:
 		var native: Object = Engine.get_singleton("OIPComms")
 		if native != _instance and native.has_method("read_bit"):
 			return bool(native.call("read_bit", group, tag))
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		return client.read_bit(tag)
 	return bool(_tag_values.get(group + "::" + tag, false))
 
 
@@ -156,6 +216,9 @@ static func write_bit(group: String, tag: String, value: bool) -> void:
 			native.call("write_bit", group, tag, value)
 			return
 	_tag_values[group + "::" + tag] = value
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		client.write_bit(tag, value)
 
 
 static func read_float32(group: String, tag: String) -> float:
@@ -163,6 +226,9 @@ static func read_float32(group: String, tag: String) -> float:
 		var native: Object = Engine.get_singleton("OIPComms")
 		if native != _instance and native.has_method("read_float32"):
 			return float(native.call("read_float32", group, tag))
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		return client.read_float32(tag)
 	return float(_tag_values.get(group + "::" + tag, 0.0))
 
 
@@ -173,6 +239,9 @@ static func write_float32(group: String, tag: String, value: float) -> void:
 			native.call("write_float32", group, tag, value)
 			return
 	_tag_values[group + "::" + tag] = value
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		client.write_float32(tag, value)
 
 
 static func read_float64(group: String, tag: String) -> float:
@@ -197,6 +266,9 @@ static func read_int16(group: String, tag: String) -> int:
 		var native: Object = Engine.get_singleton("OIPComms")
 		if native != _instance and native.has_method("read_int16"):
 			return int(native.call("read_int16", group, tag))
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		return client.read_int16(tag)
 	return int(_tag_values.get(group + "::" + tag, 0))
 
 
@@ -207,6 +279,9 @@ static func write_int16(group: String, tag: String, value: int) -> void:
 			native.call("write_int16", group, tag, value)
 			return
 	_tag_values[group + "::" + tag] = value
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		client.write_int16(tag, value)
 
 
 static func read_int32(group: String, tag: String) -> int:
@@ -214,6 +289,9 @@ static func read_int32(group: String, tag: String) -> int:
 		var native: Object = Engine.get_singleton("OIPComms")
 		if native != _instance and native.has_method("read_int32"):
 			return int(native.call("read_int32", group, tag))
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		return client.read_int32(tag)
 	return int(_tag_values.get(group + "::" + tag, 0))
 
 
@@ -224,6 +302,9 @@ static func write_int32(group: String, tag: String, value: int) -> void:
 			native.call("write_int32", group, tag, value)
 			return
 	_tag_values[group + "::" + tag] = value
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		client.write_int32(tag, value)
 
 
 static func read_uint8(group: String, tag: String) -> int:
@@ -260,6 +341,14 @@ static func set_enable_comms(enabled: bool) -> void:
 			return
 	_enable_comms = enabled
 	_instance.enable_comms_changed_signal.emit()
+	if not enabled:
+		for client: ModbusClient in _modbus_clients.values():
+			if is_instance_valid(client):
+				client.disconnect_from_plc()
+	else:
+		for client: ModbusClient in _modbus_clients.values():
+			if is_instance_valid(client):
+				client.connect_to_plc()
 
 
 static func set_sim_running(running: bool) -> void:
