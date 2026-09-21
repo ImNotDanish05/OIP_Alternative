@@ -396,10 +396,18 @@ func _on_segment_state_changed(index: int, active: bool) -> void:
 
 func _on_simulation_started() -> void:
 	if enable_comms:
-		_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_UINT8)
+		var lower_tag: String = tag_name.to_lower()
+		if lower_tag.begins_with("co") or lower_tag.begins_with("di"):
+			_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_BOOL)
+		else:
+			_tag.register(tag_group_name, tag_name, OIPComms.TAG_TYPE_UINT8)
 
 
 func _tag_group_polled(tag_group_name_param: String) -> void:
 	if not enable_comms or not _tag.matches_group(tag_group_name_param):
 		return
-	light_value = _tag.read_uint8()
+	var lower_tag: String = tag_name.to_lower()
+	if lower_tag.begins_with("co") or lower_tag.begins_with("di"):
+		light_value = 1 if _tag.read_bit() else 0
+	else:
+		light_value = _tag.read_uint8()

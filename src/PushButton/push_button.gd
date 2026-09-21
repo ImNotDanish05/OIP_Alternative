@@ -43,7 +43,9 @@ extends Node3D
 ## Final output signal after applying normally_closed logic (read-only).
 @export var output: bool = false:
 	set(value):
-		if _pushbutton_tag.is_ready() and value != output:
+		if enable_comms and not pushbutton_tag_name.is_empty() and value != output:
+			if _pushbutton_tag.tag_group_name.is_empty():
+				_pushbutton_tag.register(pushbutton_tag_group_name, pushbutton_tag_name, OIPComms.TAG_TYPE_BOOL)
 			_pushbutton_tag.write_bit(value)
 		output = value
 
@@ -141,6 +143,8 @@ func _exit_tree() -> void:
 
 
 func use() -> void:
+	if not toggle and pressed:
+		return
 	pressed = not pressed
 
 
@@ -167,6 +171,9 @@ func get_interaction_info() -> Dictionary:
 func _reset_pushbutton() -> void:
 	await get_tree().create_timer(0.3).timeout
 	pressed = false
+	if enable_comms and not pushbutton_tag_name.is_empty():
+		var reset_val: bool = !normally_closed if normally_closed else false
+		_pushbutton_tag.write_bit(reset_val)
 
 
 func _update_output() -> void:

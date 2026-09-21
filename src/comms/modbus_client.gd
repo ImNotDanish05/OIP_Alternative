@@ -196,6 +196,22 @@ func write_int32(tag: String, value: int) -> void:
 		_send_modbus_write_int32(parsed.address, value)
 
 
+func read_uint8(tag: String) -> int:
+	var val: Variant = _tag_values.get(tag, 0)
+	if val is bool:
+		return 1 if val else 0
+	return int(val) & 0xFF
+
+
+func write_uint8(tag: String, value: int) -> void:
+	_tag_values[tag] = value
+	var parsed: Dictionary = _parse_tag(tag)
+	if parsed.prefix == "co":
+		_send_modbus_write_coil(parsed.address, (value & 1) != 0)
+	elif parsed.prefix == "hr":
+		_send_modbus_write_int16(parsed.address, value & 0xFF)
+
+
 func _send_poll_requests() -> void:
 	if _registered_tags.is_empty():
 		return

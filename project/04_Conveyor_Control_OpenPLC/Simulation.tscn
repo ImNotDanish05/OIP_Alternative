@@ -10,6 +10,9 @@
 [ext_resource type="PackedScene" uid="uid://bl73u0rvt2orv" path="res://parts/Despawner.tscn" id="9_d2chr"]
 [ext_resource type="PackedScene" uid="uid://co2mqmdwpn57w" path="res://parts/BoxSpawner.tscn" id="9_eyyav"]
 [ext_resource type="PackedScene" uid="uid://cacmptrsc714x" path="res://parts/Computer.tscn" id="10_cmptr"]
+[ext_resource type="PackedScene" uid="uid://drle8i15nwr68" path="res://parts/StackLight.tscn" id="11_x4a55"]
+[ext_resource type="Script" uid="uid://bl7o7avq4pi78" path="res://src/StackLight/stack_light_data.gd" id="12_j5ff8"]
+[ext_resource type="Script" uid="uid://buet0tp11gjdl" path="res://src/StackLight/stack_segment_data.gd" id="13_8pvep"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
 script = ExtResource("3_r3ai2")
@@ -47,16 +50,25 @@ start = 2
 door_count = 2
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
-[sub_resource type="Resource" id="Resource_d2chr"]
+[sub_resource type="Resource" id="Resource_x4a55"]
 resource_local_to_scene = true
 script = ExtResource("6_scn8o")
 length = 7.99988178386747
-metadata/_belt_conveyor_owner = 5447595665167
+metadata/_belt_conveyor_owner = 1956709998442
 
-[sub_resource type="Resource" id="Resource_scn8o"]
+[sub_resource type="Resource" id="Resource_j5ff8"]
 resource_local_to_scene = true
 script = ExtResource("6_scn8o")
-metadata/_belt_conveyor_owner = 5448568743752
+metadata/_belt_conveyor_owner = 1957834074002
+
+[sub_resource type="Resource" id="Resource_8pvep"]
+resource_local_to_scene = true
+script = ExtResource("13_8pvep")
+
+[sub_resource type="Resource" id="Resource_ndy0b"]
+resource_local_to_scene = true
+script = ExtResource("12_j5ff8")
+segment_datas = [SubResource("Resource_8pvep")]
 
 [node name="Simulation" type="Node3D" unique_id=1498939903]
 
@@ -68,7 +80,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
 
 [node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("5_d2chr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3479422, 0.83929014, 1.0375223)
-segments = Array[ExtResource("6_scn8o")]([SubResource("Resource_d2chr")])
+segments = Array[ExtResource("6_scn8o")]([SubResource("Resource_x4a55")])
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
@@ -106,7 +118,7 @@ metadata/hijack_scale = true
 
 [node name="BeltConveyor2" parent="." unique_id=1654909505 instance=ExtResource("5_d2chr")]
 transform = Transform3D(0.9359686, -0.3520835, 0, 0.3520835, 0.9359686, 0, 0, 0, 1, 7.1359315, 0.927311, 1.0375223)
-segments = Array[ExtResource("6_scn8o")]([SubResource("Resource_scn8o")])
+segments = Array[ExtResource("6_scn8o")]([SubResource("Resource_j5ff8")])
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
@@ -119,10 +131,17 @@ metadata/_snap_transform = Callable()
 transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 3.7961335, 12.669698, 0.50000024, 1.1264338)
 
 [node name="Computer" parent="." unique_id=1988223311 instance=ExtResource("10_cmptr")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.2514601, 2.6)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.1474826, 2.6)
 title = "BOX COUNTER"
 enable_comms = true
 trigger_tag_group_name = "OpenPLC"
 trigger_tag_name = "co4"
 count_tag_group_name = "OpenPLC"
 count_tag_name = "hr0"
+
+[node name="StackLight" parent="." unique_id=1223138583 instance=ExtResource("11_x4a55")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.41189766, 1.1442901, 1.8027763)
+tag_group_name = "OpenPLC"
+_data = SubResource("Resource_ndy0b")
+"Light 1" = SubResource("Resource_8pvep")
+tag_name = "co5"

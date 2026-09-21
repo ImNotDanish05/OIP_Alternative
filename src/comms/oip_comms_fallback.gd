@@ -312,6 +312,9 @@ static func read_uint8(group: String, tag: String) -> int:
 		var native: Object = Engine.get_singleton("OIPComms")
 		if native != _instance and native.has_method("read_uint8"):
 			return int(native.call("read_uint8", group, tag))
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		return client.read_uint8(tag)
 	return int(_tag_values.get(group + "::" + tag, 0))
 
 
@@ -322,6 +325,9 @@ static func write_uint8(group: String, tag: String, value: int) -> void:
 			native.call("write_uint8", group, tag, value)
 			return
 	_tag_values[group + "::" + tag] = value
+	var client: ModbusClient = _modbus_clients.get(group)
+	if client != null:
+		client.write_uint8(tag, value)
 
 
 static func get_enable_comms() -> bool:
