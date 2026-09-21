@@ -54,12 +54,12 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("6_scn8o")
 length = 7.99988178386747
-metadata/_belt_conveyor_owner = 1956709998442
+metadata/_belt_conveyor_owner = 1947834853195
 
 [sub_resource type="Resource" id="Resource_j5ff8"]
 resource_local_to_scene = true
 script = ExtResource("6_scn8o")
-metadata/_belt_conveyor_owner = 1957834074002
+metadata/_belt_conveyor_owner = 1948958926723
 
 [sub_resource type="Resource" id="Resource_8pvep"]
 resource_local_to_scene = true
@@ -97,14 +97,22 @@ tag_name = "co3"
 metadata/_snap_transform = Callable()
 
 [node name="PushButton_Stop" parent="." unique_id=1216453833 instance=ExtResource("8_eyyav")]
-transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -1.2058306, 0.66097, 1.8053877)
+transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -1.1464728, 0.66097, 1.8053877)
+enable_comms = true
+pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co2"
+lamp_tag_group_name = "OpenPLC"
+
+[node name="PushButton_Stop_Emergency" parent="." unique_id=149517565 instance=ExtResource("8_eyyav")]
+transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -1.4758902, 0.66097, 1.8053877)
+text = "EMERGENCY"
 enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
 pushbutton_tag_name = "co2"
 lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButton_Start" parent="." unique_id=710515955 instance=ExtResource("8_eyyav")]
-transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -0.87110233, 0.66097, 1.8053877)
+transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -0.8117446, 0.66097, 1.8053877)
 text = "START"
 button_color = Color(0.11104921, 0.64681315, 0, 1)
 enable_comms = true
