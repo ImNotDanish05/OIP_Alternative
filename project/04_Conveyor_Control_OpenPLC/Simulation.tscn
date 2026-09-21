@@ -1,0 +1,98 @@
+[gd_scene format=3 uid="uid://c3cyrfh3wnsig"]
+
+[ext_resource type="PackedScene" uid="uid://dyhvoundu2kqc" path="res://parts/Building.tscn" id="1_a3coq"]
+[ext_resource type="Script" uid="uid://1it35d0vq4ou" path="res://parts/building_wall_rule.gd" id="3_r3ai2"]
+[ext_resource type="PackedScene" uid="uid://bp5sxcp134uj2" path="res://parts/Player.tscn" id="4_eyyav"]
+[ext_resource type="PackedScene" uid="uid://dm55h6ap605bw" path="res://parts/BeltConveyor.tscn" id="5_d2chr"]
+[ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="6_scn8o"]
+[ext_resource type="PackedScene" uid="uid://kdpe7o4ec1fa" path="res://parts/DiffuseSensor.tscn" id="7_r3ai2"]
+[ext_resource type="PackedScene" uid="uid://gddgyvex6gdj" path="res://parts/PushButton.tscn" id="8_eyyav"]
+[ext_resource type="PackedScene" uid="uid://co2mqmdwpn57w" path="res://parts/BoxSpawner.tscn" id="9_eyyav"]
+
+[sub_resource type="Resource" id="Resource_4bf66"]
+script = ExtResource("3_r3ai2")
+count = 2
+start = 1
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_ymq1x"]
+script = ExtResource("3_r3ai2")
+count = 2
+start = 24
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_2wb5a"]
+script = ExtResource("3_r3ai2")
+wall = 0
+gap = 2
+count = 2
+start = 32
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_522rc"]
+script = ExtResource("3_r3ai2")
+wall = 0
+gap = 2
+count = 2
+start = 28
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_wqnqx"]
+script = ExtResource("3_r3ai2")
+wall = 4
+count = 1
+start = 2
+door_count = 2
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_r3ai2"]
+resource_local_to_scene = true
+script = ExtResource("6_scn8o")
+length = 7.99988178386747
+metadata/_belt_conveyor_owner = 1938406057864
+
+[node name="Simulation" type="Node3D" unique_id=1498939903]
+
+[node name="Building" parent="." unique_id=183560046 instance=ExtResource("1_a3coq")]
+rules = Array[ExtResource("3_r3ai2")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])
+
+[node name="Player" parent="." unique_id=402586009 instance=ExtResource("4_eyyav")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
+
+[node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("5_d2chr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3479422, 0.83929014, 1.0375223)
+segments = Array[ExtResource("6_scn8o")]([SubResource("Resource_r3ai2")])
+enable_comms = true
+speed_tag_group_name = "OpenPLC"
+running_tag_group_name = "OpenPLC"
+running_tag_name = "co0"
+size = Vector3(8.499882, 0.5, 1.524)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
+
+[node name="DiffuseSensor" parent="." unique_id=1915908865 instance=ExtResource("7_r3ai2")]
+transform = Transform3D(0.173913, 0, 0, 0, 0.173913, 0, 0, 0, 0.173913, 5.227192, 0.955271, 0.1887902)
+enable_comms = true
+tag_group_name = "OpenPLC"
+tag_name = "co3"
+metadata/_snap_transform = Callable()
+
+[node name="PushButton_Stop" parent="." unique_id=1216453833 instance=ExtResource("8_eyyav")]
+transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -1.2058306, 0.66097, 1.8053877)
+enable_comms = true
+pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co2"
+lamp_tag_group_name = "OpenPLC"
+
+[node name="PushButton_Start" parent="." unique_id=710515955 instance=ExtResource("8_eyyav")]
+transform = Transform3D(0.423729, 0, 0, 0, 0.423729, 0, 0, 0, 0.423729, -0.87110233, 0.66097, 1.8053877)
+text = "START"
+button_color = Color(0.11104921, 0.64681315, 0, 1)
+enable_comms = true
+pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co1"
+lamp_tag_group_name = "OpenPLC"
+
+[node name="BoxSpawner" parent="." unique_id=1009593353 instance=ExtResource("9_eyyav")]
+transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -1.0549269, 2.1941981, 1.0093153)
+metadata/hijack_scale = true

@@ -30,7 +30,10 @@ static func validate_tag_property(
 
 static func default_tag_group(current: String) -> String:
 	if current.is_empty() and OIPComms.get_tag_groups().size() > 0:
-		return OIPComms.get_tag_groups()[0]
+		var first: Variant = OIPComms.get_tag_groups()[0]
+		if first is Dictionary:
+			return String((first as Dictionary).get("name", ""))
+		return String(first)
 	return current
 
 

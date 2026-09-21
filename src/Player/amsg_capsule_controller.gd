@@ -225,14 +225,7 @@ func _physics_process(delta: float) -> void:
 					if character_component and character_component.gait == Global.gait.running:
 						character_component.gait = Global.gait.walking
 
-	# Aim (right mouse)
-	if Input.is_action_pressed("aim"):
-		if character_component.rotation_mode != Global.rotation_mode.aiming:
-			_previous_rotation_mode = character_component.rotation_mode as int
-			character_component.rotation_mode = Global.rotation_mode.aiming
-	else:
-		if character_component.rotation_mode == Global.rotation_mode.aiming:
-			character_component.rotation_mode = _previous_rotation_mode as Global.rotation_mode
+	# Right Mouse Button is now dedicated to interaction ("make fungsi") via InteractionHUD; zoom is on KEY_C.
 
 	# Jump (skip if we just toggled fly or if flying - Space is for fly up)
 	if not _fly_toggled_this_frame and not is_flying:

@@ -10,6 +10,7 @@ extends Node
 ## - Clean view: 100% no UI overlay.
 
 const EditorCameraScript: GDScript = preload("res://src/Camera/editor_camera.gd")
+const InteractionHUDScript: GDScript = preload("res://src/Player/interaction_hud.gd")
 const PLAYER_SCENE_PATH: String = "res://parts/Player.tscn"
 const SPAWN_HEIGHT: float = 2.2
 const FALLBACK_SPAWN: Vector3 = Vector3(0.0, 3.0, 8.0)
@@ -22,6 +23,7 @@ enum CameraMode {
 var _current_mode: CameraMode = CameraMode.EDITOR
 var _editor_camera: Camera3D = null
 var _player_instance: Node3D = null
+var _interaction_hud: InteractionHUD = null
 
 
 func _ready() -> void:
@@ -62,6 +64,8 @@ func toggle_camera_mode() -> void:
 
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 		_current_mode = CameraMode.PLAYER
+		if _interaction_hud:
+			_interaction_hud.set_player_mode(true, _player_instance)
 		print("[Camera] Switched to Camera 2 (Player Camera). Press TAB to toggle back.")
 	else:
 		# Switch to Camera 1 (Editor Camera)
@@ -76,6 +80,8 @@ func toggle_camera_mode() -> void:
 
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		_current_mode = CameraMode.EDITOR
+		if _interaction_hud:
+			_interaction_hud.set_player_mode(false, _player_instance)
 		print("[Camera] Switched to Camera 1 (Godot Editor Camera). Press TAB to toggle back.")
 
 
@@ -133,6 +139,13 @@ func _try_spawn() -> void:
 
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	_current_mode = CameraMode.EDITOR
+
+	# 4. Spawn runtime InteractionHUD
+	_interaction_hud = InteractionHUDScript.new() as InteractionHUD
+	_interaction_hud.name = "RuntimeInteractionHUD"
+	current_scene.add_child(_interaction_hud)
+	_interaction_hud.set_player_mode(false, _player_instance)
+
 	print("[PlayerSpawner] Dual Camera system active. Default: Camera 1 (Godot Editor Camera). Press TAB to switch to Player.")
 
 

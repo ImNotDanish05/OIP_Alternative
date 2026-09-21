@@ -144,6 +144,26 @@ func use() -> void:
 	pressed = not pressed
 
 
+func get_interaction_info() -> Dictionary:
+	var label_str: String = text
+	if label_str.is_empty():
+		label_str = String(name)
+	var mode_str: String = "Toggle" if toggle else "Momentary"
+	var state_str: String = "PRESSED (ACTIVE)" if pressed else "RELEASED (STANDBY)"
+	var out_str: String = "TRUE (ON)" if output else "FALSE (OFF)"
+	var lamp_str: String = " | Lamp: ON" if lamp else ""
+	var comms_str: String = ""
+	if enable_comms and not pushbutton_tag_name.is_empty():
+		comms_str = " | Tag: %s" % pushbutton_tag_name
+
+	return {
+		"name": "Push Button [%s]" % label_str,
+		"description": "Industrial operator push button (%s) for triggering PLC/control signals." % mode_str,
+		"state": "State: %s | Output: %s%s%s" % [state_str, out_str, lamp_str, comms_str],
+		"action": "Right Click to Press"
+	}
+
+
 func _reset_pushbutton() -> void:
 	await get_tree().create_timer(0.3).timeout
 	pressed = false
