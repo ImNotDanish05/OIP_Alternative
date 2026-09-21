@@ -83,17 +83,19 @@ var _material_made_unique: bool = false
 @export var pushbutton_tag_group_name: String
 ## The tag group for writing button output state.
 @export_custom(0, "tag_group_enum") var pushbutton_tag_groups: String:
+	get:
+		return pushbutton_tag_group_name
 	set(value):
 		pushbutton_tag_group_name = value
-		pushbutton_tag_groups = value
 ## The tag name for the button output in the selected tag group.[br]Datatype: [code]BOOL[/code][br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]co0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var pushbutton_tag_name: String = ""
 @export var lamp_tag_group_name: String
 ## The tag group for reading lamp control signals.
 @export_custom(0, "tag_group_enum") var lamp_tag_groups: String:
+	get:
+		return lamp_tag_group_name
 	set(value):
 		lamp_tag_group_name = value
-		lamp_tag_groups = value
 ## The tag name for the lamp control in the selected tag group.[br]Datatype: [code]BOOL[/code][br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]co0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var lamp_tag_name: String = ""
 

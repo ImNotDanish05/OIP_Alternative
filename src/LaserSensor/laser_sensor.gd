@@ -41,9 +41,10 @@ var _beam_needs_update: bool = true
 @export var tag_group_name: String
 ## The tag group for writing distance values to external systems.
 @export_custom(0, "tag_group_enum") var tag_groups: String:
+	get:
+		return tag_group_name
 	set(value):
 		tag_group_name = value
-		tag_groups = value
 ## The tag name for the distance value in the selected tag group.[br]Datatype: [code]REAL[/code] (32-bit float)[br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]hr0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var tag_name: String = ""
 

@@ -58,7 +58,7 @@ naming/scene_name_casing=1
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/AMSG/plugin.cfg", "res://addons/PoseWarping/plugin.cfg", "res://addons/agv_gizmo/plugin.cfg", "res://addons/conveyor_gizmo/plugin.cfg", "res://addons/dock_door_tool/plugin.cfg", "res://addons/gantry_gizmo/plugin.cfg", "res://addons/oip_comms/plugin.cfg", "res://addons/oip_ui/plugin.cfg", "res://addons/opc_ua_browser/plugin.cfg", "res://addons/robot_gizmo/plugin.cfg", "res://addons/scene-library/plugin.cfg", "res://addons/scene_interop/plugin.cfg", "res://addons/st_editor/plugin.cfg")
+enabled=PackedStringArray("res://addons/AMSG/plugin.cfg", "res://addons/PoseWarping/plugin.cfg", "res://addons/agv_gizmo/plugin.cfg", "res://addons/conveyor_gizmo/plugin.cfg", "res://addons/dock_door_tool/plugin.cfg", "res://addons/gantry_gizmo/plugin.cfg", "res://addons/oip_comms/plugin.cfg", "res://addons/oip_ui/plugin.cfg", "res://addons/opc_ua_browser/plugin.cfg", "res://addons/robot_gizmo/plugin.cfg", "res://addons/scene-library/plugin.cfg", "res://addons/scene_interop/plugin.cfg", "res://addons/st_editor/plugin.cfg", "res://addons/tag_groups/plugin.cfg")
 
 [filesystem]
 

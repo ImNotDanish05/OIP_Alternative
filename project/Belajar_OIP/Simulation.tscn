@@ -53,21 +53,21 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("5_u1r1f")
 length = 10.438197902648056
-metadata/_belt_conveyor_owner = 1782210176580
+metadata/_belt_conveyor_owner = 1803617904225
 
 [sub_resource type="Resource" id="Resource_p3786"]
 resource_local_to_scene = true
 script = ExtResource("5_u1r1f")
-metadata/_belt_conveyor_owner = 1782310839880
+metadata/_belt_conveyor_owner = 1803718567525
 
 [sub_resource type="Resource" id="Resource_5l13y"]
 resource_local_to_scene = true
 script = ExtResource("5_u1r1f")
 length = 3.17705575393161
-metadata/_belt_conveyor_owner = 1783887898267
+metadata/_belt_conveyor_owner = 1805295625912
 
 [node name="Simulation" type="Node3D" unique_id=1163379344]
-metadata/oip_st_program = ""
+metadata/oip_st_program = "test"
 
 [node name="Building" parent="." unique_id=183560046 instance=ExtResource("1_anvak")]
 rules = Array[ExtResource("3_72sig")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])

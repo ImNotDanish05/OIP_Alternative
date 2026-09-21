@@ -47,9 +47,10 @@ var _gate_tag := OIPCommsTag.new()
 @export var gate_tag_group_name: String
 ## The tag group for writing the gate output state.
 @export_custom(0, "tag_group_enum") var gate_tag_groups: String:
+	get:
+		return gate_tag_group_name
 	set(value):
 		gate_tag_group_name = value
-		gate_tag_groups = value
 ## The tag name for the gate output in the selected tag group.[br]Datatype: [code]BOOL[/code][br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]co0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var gate_tag_name: String = ""
 

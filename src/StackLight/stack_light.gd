@@ -72,9 +72,10 @@ var enable_comms: bool = true
 @export var tag_group_name: String
 ## The tag group for reading light values from external systems.
 var _tag_groups: String:
+	get:
+		return tag_group_name
 	set(value):
 		tag_group_name = value
-		_tag_groups = value
 
 ## The tag name for the light value in the selected tag group.[br]Datatype: [code]BYTE[/code] (8-bit)[br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]hr0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 var tag_name: String = ""
@@ -94,6 +95,8 @@ var _tag := OIPCommsTag.new()
 
 
 func _get(property: StringName) -> Variant:
+	if property == &"tag_groups":
+		return tag_group_name
 	if not is_inside_tree() or not _segments_container:
 		return null
 
@@ -102,6 +105,13 @@ func _get(property: StringName) -> Variant:
 			var segment := _segments_container.get_child(i)
 			return segment.segment_data
 	return null
+
+
+func _set(property: StringName, value: Variant) -> bool:
+	if property == &"tag_groups":
+		tag_group_name = str(value)
+		return true
+	return false
 
 
 func _validate_property(property: Dictionary) -> void:

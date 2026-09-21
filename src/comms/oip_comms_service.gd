@@ -6,8 +6,7 @@ const SETTINGS_FILE: String = "res://oip_data/comms_settings.cfg"
 
 
 func _ready() -> void:
-	if not Engine.is_editor_hint():
-		bootstrap()
+	bootstrap()
 
 
 func _exit_tree() -> void:

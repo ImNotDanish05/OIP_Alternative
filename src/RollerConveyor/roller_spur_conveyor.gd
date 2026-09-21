@@ -210,15 +210,17 @@ const _LEG_MIDDLE_PREFIX := "Leg_Middle_"
 @export var enable_comms: bool = false
 @export var speed_tag_group_name: String
 @export_custom(0, "tag_group_enum") var speed_tag_groups: String:
+	get:
+		return speed_tag_group_name
 	set(value):
 		speed_tag_group_name = value
-		speed_tag_groups = value
 @export var speed_tag_name: String = ""
 @export var running_tag_group_name: String
 @export_custom(0, "tag_group_enum") var running_tag_groups: String:
+	get:
+		return running_tag_group_name
 	set(value):
 		running_tag_group_name = value
-		running_tag_groups = value
 @export var running_tag_name: String = ""
 
 

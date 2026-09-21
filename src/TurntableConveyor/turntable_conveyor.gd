@@ -107,17 +107,19 @@ var current_angle: float = 0.0:
 @export var enable_comms: bool = false
 @export var speed_tag_group_name: String
 @export_custom(0, "tag_group_enum") var speed_tag_groups: String:
+	get:
+		return speed_tag_group_name
 	set(value):
 		speed_tag_group_name = value
-		speed_tag_groups = value
 ## The tag name for the roller speed in the selected tag group.[br]Datatype: [code]REAL[/code] (32-bit float)[br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]hr0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var speed_tag_name: String = ""
 @export var target_angle_tag_group_name: String
 @export_custom(0, "tag_group_enum") var target_angle_tag_groups: String:
+	get:
+		return target_angle_tag_group_name
 	set(value):
 		target_angle_tag_group_name = value
-		target_angle_tag_groups = value
-## The tag name for the commanded deck angle (degrees) in the selected tag group.[br]Datatype: [code]REAL[/code] (32-bit float)[br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]hr0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
+## The tag name for the commanded deck angle (degrees) in the selected tag group.[br]Datatype: [code]REAL[/code] (32-bit float)[br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]co0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var target_angle_tag_name: String = ""
 
 

@@ -63,9 +63,10 @@ const AGVWaypointScript := preload("res://src/AGV/agv_waypoint.gd")
 @export var enable_comms: bool = false
 @export var tag_group_name: String
 @export_custom(0, "tag_group_enum") var tag_groups: String:
+	get:
+		return tag_group_name
 	set(value):
 		tag_group_name = value
-		tag_groups = value
 ## Integer value selecting which waypoint to move to (0 = home, 1+ = waypoint by order).[br]Datatype: [code]INT[/code] (16-bit integer)
 @export var command_tag: String = ""
 ## Rising edge triggers movement to command waypoint.[br]Datatype: [code]BOOL[/code]

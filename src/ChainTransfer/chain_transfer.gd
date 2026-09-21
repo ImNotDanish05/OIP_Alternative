@@ -67,17 +67,19 @@ func get_snap_features() -> Array:
 @export var speed_tag_group_name: String
 ## The tag group for reading speed values from external systems.
 @export_custom(0, "tag_group_enum") var speed_tag_groups: String:
+	get:
+		return speed_tag_group_name
 	set(value):
 		speed_tag_group_name = value
-		speed_tag_groups = value
 ## The tag name for the speed value in the selected tag group.[br]Datatype: [code]REAL[/code] (32-bit float)[br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]hr0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var speed_tag_name: String = ""
 @export var popup_tag_group_name: String
 ## The tag group for reading popup state from external systems.
 @export_custom(0, "tag_group_enum") var popup_tag_groups: String:
+	get:
+		return popup_tag_group_name
 	set(value):
 		popup_tag_group_name = value
-		popup_tag_groups = value
 ## The tag name for the popup state in the selected tag group.[br]Datatype: [code]BOOL[/code][br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]co0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var popup_tag_name: String = ""
 

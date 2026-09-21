@@ -21,9 +21,10 @@ var _tag := OIPCommsTag.new()
 @export var tag_group_name: String
 ## The tag group for reading divert commands from external systems.
 @export_custom(0, "tag_group_enum") var tag_groups: String:
+	get:
+		return tag_group_name
 	set(value):
 		tag_group_name = value
-		tag_groups = value
 ## The tag name for the divert trigger in the selected tag group.[br]Datatype: [code]BOOL[/code][br][br]Format varies by protocol:[br][b]EIP:[/b] CIP tag names[br][b]Modbus:[/b] prefix+number (e.g. [code]co0[/code])[br][b]OPC UA:[/b] full NodeId (e.g. [code]ns=2;s=MyVariable[/code] or [code]ns=2;i=12345[/code]).
 @export var tag_name: String = ""
 
