@@ -209,7 +209,9 @@ func _update_tooltip_content(target: Node) -> void:
 
 	# Update accent bar color depending on object state
 	if _accent_bar:
-		if target is PushButton:
+		if info.has("accent_color") and info["accent_color"] is Color:
+			_accent_bar.color = info["accent_color"] as Color
+		elif target is PushButton:
 			var pb: PushButton = target as PushButton
 			_accent_bar.color = pb.button_color if pb.pressed else Color(0.2, 0.6, 1.0)
 		else:

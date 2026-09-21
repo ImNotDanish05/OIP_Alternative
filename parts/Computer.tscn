@@ -1,0 +1,131 @@
+[gd_scene format=3 uid="uid://b9cmptrsc714x"]
+
+[ext_resource type="Script" uid="uid://b7cmptrgd892a" path="res://src/Computer/computer.gd" id="1_comp"]
+[ext_resource type="PackedScene" uid="uid://2gb3wh64akvs" path="res://parts/StraightLeg.tscn" id="2_leg"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_desk"]
+albedo_color = Color(0.16, 0.17, 0.2, 1)
+metallic = 0.55
+roughness = 0.42
+
+[sub_resource type="BoxMesh" id="BoxMesh_desk"]
+size = Vector3(0.65, 0.04, 0.45)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trim"]
+albedo_color = Color(0.08, 0.09, 0.1, 1)
+metallic = 0.2
+roughness = 0.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_trim"]
+size = Vector3(0.34, 0.008, 0.15)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_chassis"]
+albedo_color = Color(0.11, 0.12, 0.14, 1)
+metallic = 0.6
+roughness = 0.38
+
+[sub_resource type="BoxMesh" id="BoxMesh_neck"]
+size = Vector3(0.08, 0.12, 0.06)
+
+[sub_resource type="BoxMesh" id="BoxMesh_monitor"]
+size = Vector3(0.54, 0.36, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_screen"]
+albedo_color = Color(0.02, 0.03, 0.05, 1)
+metallic = 0.15
+roughness = 0.15
+
+[sub_resource type="BoxMesh" id="BoxMesh_screen"]
+size = Vector3(0.48, 0.3, 0.006)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_led"]
+resource_local_to_scene = true
+albedo_color = Color(0.15, 0.85, 0.3, 1)
+emission_enabled = true
+emission = Color(0.1, 1, 0.35, 1)
+emission_energy_multiplier = 0.4
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_led"]
+top_radius = 0.015
+bottom_radius = 0.018
+height = 0.015
+radial_segments = 16
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_comp"]
+size = Vector3(0.65, 0.52, 0.46)
+
+[node name="Computer" type="Node3D"]
+script = ExtResource("1_comp")
+
+[node name="Desk" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, 0)
+material_override = SubResource("StandardMaterial3D_desk")
+mesh = SubResource("BoxMesh_desk")
+
+[node name="KeypadTrim" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.044, 0.1)
+material_override = SubResource("StandardMaterial3D_trim")
+mesh = SubResource("BoxMesh_trim")
+
+[node name="StandNeck" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, -0.05)
+material_override = SubResource("StandardMaterial3D_chassis")
+mesh = SubResource("BoxMesh_neck")
+
+[node name="MonitorHousing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.28, -0.06)
+material_override = SubResource("StandardMaterial3D_chassis")
+mesh = SubResource("BoxMesh_monitor")
+
+[node name="Screen" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0.28, -0.06)
+
+[node name="ScreenMesh" type="MeshInstance3D" parent="Screen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.026)
+material_override = SubResource("StandardMaterial3D_screen")
+mesh = SubResource("BoxMesh_screen")
+
+[node name="HeaderLabel" type="Label3D" parent="Screen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0.031)
+pixel_size = 0.002
+text = "PRODUCTION COUNTER"
+font_size = 22
+outline_size = 4
+modulate = Color(0.2, 0.85, 1, 1)
+outline_modulate = Color(0, 0, 0, 1)
+
+[node name="CountLabel" type="Label3D" parent="Screen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.008, 0.031)
+pixel_size = 0.002
+text = "00000"
+font_size = 52
+outline_size = 8
+modulate = Color(0, 1, 0.35, 1)
+outline_modulate = Color(0, 0.15, 0.04, 1)
+
+[node name="StatusLabel" type="Label3D" parent="Screen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.09, 0.031)
+pixel_size = 0.002
+text = "ONLINE | STANDBY"
+font_size = 15
+outline_size = 3
+modulate = Color(0.65, 0.75, 0.85, 1)
+outline_modulate = Color(0, 0, 0, 1)
+
+[node name="LedIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.22, 0.045, 0.12)
+material_override = SubResource("StandardMaterial3D_led")
+mesh = SubResource("CylinderMesh_led")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+collision_layer = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.24, 0)
+shape = SubResource("BoxShape3D_comp")
+
+[node name="StraightLeg" parent="." instance=ExtResource("2_leg")]
+transform = Transform3D(1, 0, 0, 0, 0.9, 0, 0, 0, 0.25, 0, -0.9, 0)
+clamp_enabled = false
+single_post = true
+
