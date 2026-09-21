@@ -59,6 +59,11 @@ max_value = 1000000.0
 value = 100.0
 rounded = true
 
+[node name="ApplyToAll" type="Button" parent="Row1"]
+layout_mode = 2
+tooltip_text = "Apply this tag group to all communication objects in the active scene"
+text = "Apply to All"
+
 [node name="Delete" type="Button" parent="Row1"]
 layout_mode = 2
 text = "Delete"
@@ -141,6 +146,7 @@ layout_mode = 2
 [connection signal="text_changed" from="Row1/Name" to="." method="_on_text_changed"]
 [connection signal="item_selected" from="Row1/Protocol" to="." method="_on_item_selected"]
 [connection signal="value_changed" from="Row1/PollingRate" to="." method="_on_value_changed"]
+[connection signal="pressed" from="Row1/ApplyToAll" to="." method="_on_apply_to_all_pressed"]
 [connection signal="pressed" from="Row1/Delete" to="." method="_on_Delete_pressed"]
 [connection signal="text_changed" from="Row2/Gateway" to="." method="_on_Gateway_text_changed"]
 [connection signal="text_changed" from="Row2/Path" to="." method="_on_Path_text_changed"]

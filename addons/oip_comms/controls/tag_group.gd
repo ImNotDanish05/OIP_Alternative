@@ -4,6 +4,7 @@ extends Control
 
 signal tag_group_delete(t: _OIPCommsTagGroup)
 signal tag_group_save(t: _OIPCommsTagGroup)
+signal tag_group_apply_to_all(t: _OIPCommsTagGroup)
 
 var save_data := {}
 
@@ -58,6 +59,15 @@ func _load() -> void:
 		else:
 			cpu.text = save_data["cpu"]
 		loading_complete = true
+
+func get_group_name() -> String:
+	if _name:
+		return _name.text.strip_edges()
+	return save_data.get("name", "").strip_edges()
+
+func _on_apply_to_all_pressed() -> void:
+	save()
+	tag_group_apply_to_all.emit(self)
 
 func _on_Delete_pressed() -> void:
 	tag_group_delete.emit(self)

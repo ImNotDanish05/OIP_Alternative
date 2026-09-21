@@ -12,7 +12,7 @@ export_credentials.cfg
 addons/oip_comms/bin/windows/~libOIP-COMMS.windows.*
 addons/zylann.editor_debugger
 
-oip_data/
+oip_data/editor_camera.cfg
 
 #Other
 .vs/

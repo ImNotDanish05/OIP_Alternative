@@ -19,6 +19,9 @@ func _exit_tree() -> void:
 
 
 func bootstrap() -> void:
+	var oip_data_path := ProjectSettings.globalize_path("res://oip_data")
+	if not DirAccess.dir_exists_absolute(oip_data_path):
+		DirAccess.make_dir_recursive_absolute(oip_data_path)
 	_apply_settings()
 	register_tag_groups()
 

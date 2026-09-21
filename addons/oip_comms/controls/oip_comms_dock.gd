@@ -28,7 +28,9 @@ var tag_groups_config: ConfigFile = ConfigFile.new()
 var _service: Node
 
 func _ready() -> void:
-	DirAccess.make_dir_recursive_absolute("res://oip_data")
+	var oip_data_path := ProjectSettings.globalize_path("res://oip_data")
+	if not DirAccess.dir_exists_absolute(oip_data_path):
+		DirAccess.make_dir_recursive_absolute(oip_data_path)
 	load_tag_groups_data()
 	load_tag_groups_ui()
 	load_settings()
@@ -82,10 +84,19 @@ func load_tag_groups_ui() -> void:
 		tag_group.save_data = tag_group_data.duplicate()
 		tag_group.tag_group_delete.connect(tag_group_delete)
 		tag_group.tag_group_save.connect(tag_group_save)
+		tag_group.tag_group_apply_to_all.connect(_on_tag_group_apply_to_all)
 		v_box_container.add_child(tag_group)
 
-func tag_group_save(_t: _OIPCommsTagGroup) -> void:
+func _sync_tag_groups_live() -> void:
 	save_tag_groups_ui()
+	if _has_duplicate_names():
+		return
+	save_tag_groups_data()
+	if _service != null and _service.has_method("register_tag_groups"):
+		_service.register_tag_groups()
+
+func tag_group_save(_t: _OIPCommsTagGroup) -> void:
+	_sync_tag_groups_live()
 	mark_changes_present()
 
 func _has_duplicate_names() -> bool:
@@ -139,6 +150,10 @@ func save_tag_groups_ui() -> void:
 		tag_groups_data.push_back(tag_group.save_data)
 
 func save_tag_groups_data() -> void:
+	var oip_data_path := ProjectSettings.globalize_path("res://oip_data")
+	if not DirAccess.dir_exists_absolute(oip_data_path):
+		DirAccess.make_dir_recursive_absolute(oip_data_path)
+
 	tag_groups_config.clear()
 
 	tag_groups_config.set_value("info", "group_count", tag_groups_data.size())
@@ -154,7 +169,9 @@ func save_tag_groups_data() -> void:
 		tag_groups_config.set_value(group_section, "path", group_data.path)
 		tag_groups_config.set_value(group_section, "cpu", group_data.cpu)
 
-	tag_groups_config.save(TAG_GROUPS_FILE)
+	var err: Error = tag_groups_config.save(TAG_GROUPS_FILE)
+	if err != OK:
+		push_warning("OIP Comms: Failed to save tag groups config (%d)" % err)
 
 func tag_group_delete(t: _OIPCommsTagGroup) -> void:
 	var index := -1
@@ -169,6 +186,7 @@ func tag_group_delete(t: _OIPCommsTagGroup) -> void:
 	if index != -1:
 		tag_groups_data.remove_at(index)
 		t.queue_free()
+		_sync_tag_groups_live()
 		mark_changes_present()
 
 func _on_AddTagGroup_pressed() -> void:
@@ -178,6 +196,7 @@ func _on_AddTagGroup_pressed() -> void:
 		"gateway": "localhost", "path": "1,0", "cpu": "ControlLogix"
 	})
 	load_tag_groups_ui()
+	_sync_tag_groups_live()
 	mark_changes_present()
 
 func _on_EnableComms_toggled(toggled_on: bool) -> void:
@@ -216,3 +235,109 @@ func mark_changes_present() -> void:
 		save_changes.emit(changes_present)
 		if is_instance_valid(save_comms_button):
 			save_comms_button.disabled = false
+
+func _on_tag_group_apply_to_all(t: _OIPCommsTagGroup) -> void:
+	if t == null:
+		return
+	var group_name: String = t.get_group_name()
+	if group_name.is_empty():
+		var warn_dialog := AcceptDialog.new()
+		warn_dialog.title = "OIP Comms"
+		warn_dialog.dialog_text = "Please enter a name for the tag group first."
+		add_child(warn_dialog)
+		warn_dialog.popup_centered()
+		warn_dialog.confirmed.connect(warn_dialog.queue_free)
+		warn_dialog.canceled.connect(warn_dialog.queue_free)
+		return
+
+	_sync_tag_groups_live()
+	mark_changes_present()
+
+	var root: Node = EditorInterface.get_edited_scene_root()
+	if root == null:
+		var err_dialog := AcceptDialog.new()
+		err_dialog.title = "OIP Comms"
+		err_dialog.dialog_text = "No active scene open in the editor."
+		add_child(err_dialog)
+		err_dialog.popup_centered()
+		err_dialog.confirmed.connect(err_dialog.queue_free)
+		err_dialog.canceled.connect(err_dialog.queue_free)
+		return
+
+	var all_nodes: Array[Node] = []
+	_collect_nodes_recursive(root, all_nodes)
+
+	var affected_nodes: Array[Node] = []
+	var node_props_map: Dictionary = {}
+
+	for node: Node in all_nodes:
+		if node != root and node.owner == null:
+			continue
+
+		var tag_props: Array[String] = []
+		for p: Dictionary in node.get_property_list():
+			var pname: String = p.get("name", "")
+			var hint_str: String = p.get("hint_string", "")
+			if hint_str == "tag_group_enum" or pname.ends_with("_tag_groups") or pname == "tag_groups" or pname.ends_with("_tag_group_name") or pname == "tag_group_name":
+				if not pname in tag_props:
+					tag_props.append(pname)
+				if pname.ends_with("_tag_groups"):
+					var backing := pname.replace("tag_groups", "tag_group_name")
+					if not backing in tag_props:
+						tag_props.append(backing)
+				elif pname == "tag_groups":
+					if not "tag_group_name" in tag_props:
+						tag_props.append("tag_group_name")
+				elif pname.ends_with("_tag_group_name"):
+					var virt := pname.replace("tag_group_name", "tag_groups")
+					if not virt in tag_props:
+						tag_props.append(virt)
+				elif pname == "tag_group_name":
+					if not "tag_groups" in tag_props:
+						tag_props.append("tag_groups")
+
+		if not tag_props.is_empty():
+			affected_nodes.append(node)
+			node_props_map[node] = tag_props
+
+	if affected_nodes.is_empty():
+		var info_dialog := AcceptDialog.new()
+		info_dialog.title = "OIP Comms"
+		info_dialog.dialog_text = "No objects with communication properties found in scene '%s'." % root.name
+		add_child(info_dialog)
+		info_dialog.popup_centered()
+		info_dialog.confirmed.connect(info_dialog.queue_free)
+		info_dialog.canceled.connect(info_dialog.queue_free)
+		return
+
+	var undo_redo: EditorUndoRedoManager = EditorInterface.get_editor_undo_redo()
+	undo_redo.create_action("Apply Tag Group '%s' to All Scene Objects" % group_name)
+
+	for node: Node in affected_nodes:
+		var props: Array[String] = node_props_map[node]
+		for prop: String in props:
+			if prop in node or node.get(prop) != null:
+				var old_val: Variant = node.get(prop)
+				undo_redo.add_do_property(node, prop, group_name)
+				undo_redo.add_undo_property(node, prop, old_val)
+		if "enable_comms" in node:
+			var old_enable: Variant = node.get("enable_comms")
+			undo_redo.add_do_property(node, "enable_comms", true)
+			undo_redo.add_undo_property(node, "enable_comms", old_enable)
+		undo_redo.add_do_method(node, "notify_property_list_changed")
+		undo_redo.add_undo_method(node, "notify_property_list_changed")
+
+	undo_redo.commit_action()
+
+	var success_dialog := AcceptDialog.new()
+	success_dialog.title = "OIP Comms"
+	success_dialog.dialog_text = "Applied tag group '%s' to %d object(s) in active scene ('%s')." % [group_name, affected_nodes.size(), root.name]
+	add_child(success_dialog)
+	success_dialog.popup_centered()
+	success_dialog.confirmed.connect(success_dialog.queue_free)
+	success_dialog.canceled.connect(success_dialog.queue_free)
+
+func _collect_nodes_recursive(node: Node, result: Array[Node]) -> void:
+	result.append(node)
+	for child: Node in node.get_children():
+		_collect_nodes_recursive(child, result)
