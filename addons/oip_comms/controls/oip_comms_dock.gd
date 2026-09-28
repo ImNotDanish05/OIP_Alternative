@@ -8,6 +8,7 @@ class_name _OIPCommsDock
 extends Control
 
 signal save_changes(value: bool)
+signal open_driver_io()
 
 const TAG_GROUPS_FILE := "res://oip_data/tag_groups.cfg"
 const SETTINGS_FILE := "res://oip_data/comms_settings.cfg"
@@ -46,6 +47,16 @@ func _ready() -> void:
 	if is_instance_valid(save_comms_button):
 		save_comms_button.pressed.connect(_on_save_comms_button_pressed)
 		save_comms_button.disabled = true
+
+	var toolbar_node: HBoxContainer = get_node_or_null("Layout/Toolbar") as HBoxContainer
+	if toolbar_node != null:
+		var driver_io_btn := Button.new()
+		driver_io_btn.text = "Driver I/O ➜"
+		driver_io_btn.tooltip_text = "Open Driver Input & Output Variables for Active Scene"
+		driver_io_btn.pressed.connect(func() -> void:
+			open_driver_io.emit()
+		)
+		toolbar_node.add_child(driver_io_btn)
 
 func load_tag_groups_data() -> void:
 	tag_groups_data = []

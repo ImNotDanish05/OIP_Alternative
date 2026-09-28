@@ -54,12 +54,12 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("6_scn8o")
 length = 7.99988178386747
-metadata/_belt_conveyor_owner = 1947834853195
+metadata/_belt_conveyor_owner = 1955183274240
 
 [sub_resource type="Resource" id="Resource_j5ff8"]
 resource_local_to_scene = true
 script = ExtResource("6_scn8o")
-metadata/_belt_conveyor_owner = 1948958926723
+metadata/_belt_conveyor_owner = 1956458342730
 
 [sub_resource type="Resource" id="Resource_8pvep"]
 resource_local_to_scene = true
