@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://dxitvub03lcgu"]
+
+[ext_resource type="PackedScene" uid="uid://dyhvoundu2kqc" path="res://parts/Building.tscn" id="1_ox2g8"]
+[ext_resource type="Script" uid="uid://1it35d0vq4ou" path="res://parts/building_wall_rule.gd" id="3_6otwo"]
+[ext_resource type="PackedScene" uid="uid://bp5sxcp134uj2" path="res://parts/Player.tscn" id="4_bi4u2"]
+[ext_resource type="PackedScene" uid="uid://dm55h6ap605bw" path="res://parts/BeltConveyor.tscn" id="5_6otwo"]
+[ext_resource type="PackedScene" uid="uid://co2mqmdwpn57w" path="res://parts/BoxSpawner.tscn" id="6_017ys"]
+[ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="6_bi4u2"]
+[ext_resource type="PackedScene" uid="uid://bl73u0rvt2orv" path="res://parts/Despawner.tscn" id="7_bl8qy"]
+
+[sub_resource type="Resource" id="Resource_4bf66"]
+script = ExtResource("3_6otwo")
+count = 2
+start = 1
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_ymq1x"]
+script = ExtResource("3_6otwo")
+count = 2
+start = 24
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_2wb5a"]
+script = ExtResource("3_6otwo")
+wall = 0
+gap = 2
+count = 2
+start = 32
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_522rc"]
+script = ExtResource("3_6otwo")
+wall = 0
+gap = 2
+count = 2
+start = 28
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_wqnqx"]
+script = ExtResource("3_6otwo")
+wall = 4
+count = 1
+start = 2
+door_count = 2
+metadata/_custom_type_script = "uid://1it35d0vq4ou"
+
+[sub_resource type="Resource" id="Resource_bi4u2"]
+resource_local_to_scene = true
+script = ExtResource("6_bi4u2")
+metadata/_belt_conveyor_owner = 1943338559307
+
+[node name="Simulation" type="Node3D" unique_id=1048692814]
+
+[node name="Building" parent="." unique_id=183560046 instance=ExtResource("1_ox2g8")]
+rules = Array[ExtResource("3_6otwo")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])
+
+[node name="Player" parent="." unique_id=402586009 instance=ExtResource("4_bi4u2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
+
+[node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("5_6otwo")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2561584, 1.4033145, -1.0444832)
+segments = Array[ExtResource("6_bi4u2")]([SubResource("Resource_bi4u2")])
+enable_comms = true
+speed_tag_group_name = "OpenPLC"
+running_tag_group_name = "OpenPLC"
+running_tag_name = "co1"
+size = Vector3(4.5, 0.5, 1.524)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
+
+[node name="BoxSpawner" parent="." unique_id=1009593353 instance=ExtResource("6_017ys")]
+transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -0.74488616, 2.292438, -0.96039844)
+metadata/hijack_scale = true
+
+[node name="Despawner" parent="." unique_id=1495546615 instance=ExtResource("7_bl8qy")]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 4.3261313, 0.5000005, -1.2619443)

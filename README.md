@@ -143,7 +143,24 @@ When connecting Open Industry Project with [OpenPLC](https://openplcproject.com/
 - **Add Server**: In OpenPLC Editor, ensure a **Modbus/TCP Server** is created, enabled, and listening on port `502`.
 - **Target Device**: Set target board to `OpenPLC Runtime v4` with IP `127.0.0.1` and connect before building and deploying.
 
-#### 3. Belajar_OIP Example Project
+#### 3. Running & Stopping OpenPLC Runtime (Docker)
+Jika menggunakan container Docker `openplc-runtime`:
+- **Menyalakan / Start Runtime**:
+  ```bash
+  docker start openplc-runtime
+  ```
+- **Mematikan / Stop Runtime**:
+  ```bash
+  docker stop openplc-runtime
+  ```
+- **Cek Status Container**:
+  ```bash
+  docker ps -a --filter name=openplc-runtime
+  ```
+- **Web Dashboard**:
+  Buka browser ke `https://localhost:8443` (atau `http://localhost:8080`) untuk melihat status OpenPLC Runtime.
+
+#### 4. Belajar_OIP Example Project
 The project at `project/Belajar_OIP` demonstrates a box-sorting conveyor system powered by OpenPLC Ladder Diagram:
 
 | Device | Godot Node | OIP Tag Name | OpenPLC Address | Variable Name | Role |
