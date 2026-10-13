@@ -38,26 +38,52 @@ func _init() -> void:
 
 func _ready() -> void:
 	_refresh_known_tag_groups()
+	visibility_changed.connect(_on_visibility_changed)
 	if Engine.is_editor_hint():
-		if _scene_root == null:
-			set_scene_root(EditorInterface.get_edited_scene_root())
+		call_deferred("_sync_active_scene")
+
+
+func _on_visibility_changed() -> void:
+	if is_visible_in_tree() and Engine.is_editor_hint():
+		_sync_active_scene()
+
+
+func _sync_active_scene() -> void:
+	if Engine.is_editor_hint():
+		var root: Node = EditorInterface.get_edited_scene_root()
+		if root != _scene_root:
+			set_scene_root(root)
+		elif _scene_root == null:
+			_rescan_scene()
 
 
 func set_scene_root(root: Node) -> void:
 	if _scene_root != null and is_instance_valid(_scene_root):
-		if _scene_root.tree_changed.is_connected(_on_scene_tree_changed):
-			_scene_root.tree_changed.disconnect(_on_scene_tree_changed)
+		if _scene_root.child_entered_tree.is_connected(_on_node_tree_changed):
+			_scene_root.child_entered_tree.disconnect(_on_node_tree_changed)
+		if _scene_root.child_exiting_tree.is_connected(_on_node_tree_changed):
+			_scene_root.child_exiting_tree.disconnect(_on_node_tree_changed)
+		if _scene_root.tree_exited.is_connected(_on_scene_root_exited):
+			_scene_root.tree_exited.disconnect(_on_scene_root_exited)
 
 	_scene_root = root
 
 	if _scene_root != null and is_instance_valid(_scene_root):
-		if not _scene_root.tree_changed.is_connected(_on_scene_tree_changed):
-			_scene_root.tree_changed.connect(_on_scene_tree_changed)
+		if not _scene_root.child_entered_tree.is_connected(_on_node_tree_changed):
+			_scene_root.child_entered_tree.connect(_on_node_tree_changed)
+		if not _scene_root.child_exiting_tree.is_connected(_on_node_tree_changed):
+			_scene_root.child_exiting_tree.connect(_on_node_tree_changed)
+		if not _scene_root.tree_exited.is_connected(_on_scene_root_exited):
+			_scene_root.tree_exited.connect(_on_scene_root_exited)
 
 	_rescan_scene()
 
 
-func _on_scene_tree_changed() -> void:
+func _on_node_tree_changed(_child: Node) -> void:
+	call_deferred("_rescan_scene")
+
+
+func _on_scene_root_exited() -> void:
 	call_deferred("_rescan_scene")
 
 
@@ -145,7 +171,12 @@ func _build_ui() -> void:
 	_refresh_btn = Button.new()
 	_refresh_btn.text = "Refresh"
 	_refresh_btn.tooltip_text = "Rescan active scene for I/O variables"
-	_refresh_btn.pressed.connect(_rescan_scene)
+	_refresh_btn.pressed.connect(func() -> void:
+		if Engine.is_editor_hint():
+			set_scene_root(EditorInterface.get_edited_scene_root())
+		else:
+			_rescan_scene()
+	)
 	toolbar.add_child(_refresh_btn)
 
 	# Spacer
@@ -319,12 +350,18 @@ func _create_column_panel(title_text: String, header_color: Color) -> VBoxContai
 func _rescan_scene() -> void:
 	_refresh_known_tag_groups()
 
-	if _scene_root == null or not is_instance_valid(_scene_root):
-		if Engine.is_editor_hint():
-			_scene_root = EditorInterface.get_edited_scene_root()
+	if Engine.is_editor_hint():
+		var active_root: Node = EditorInterface.get_edited_scene_root()
+		if active_root != null and is_instance_valid(active_root):
+			if _scene_root != active_root:
+				set_scene_root(active_root)
+				return
+		elif _scene_root == null or not is_instance_valid(_scene_root):
+			_scene_root = null
 
 	if _scene_root == null or not is_instance_valid(_scene_root):
 		_scene_label.text = "[No Active Scene]"
+		_scene_label.tooltip_text = "No active scene open in the editor"
 		_split_container.visible = false
 		_empty_label.visible = true
 		_inputs.clear()
@@ -342,6 +379,7 @@ func _rescan_scene() -> void:
 		_scene_label.text = _scene_root.name + " (unsaved)"
 	else:
 		_scene_label.text = scene_path.get_file()
+	_scene_label.tooltip_text = scene_path if not scene_path.is_empty() else _scene_root.name
 
 	_inputs.clear()
 	_outputs.clear()

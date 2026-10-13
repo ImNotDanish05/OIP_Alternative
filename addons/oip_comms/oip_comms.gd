@@ -50,12 +50,18 @@ func _enter_tree() -> void:
 
 	# 4. Scene tracking
 	scene_changed.connect(_on_scene_changed)
-	_on_scene_changed(EditorInterface.get_edited_scene_root())
+	scene_closed.connect(_on_scene_closed)
+	main_screen_changed.connect(_on_main_screen_changed)
+	call_deferred("_sync_active_scene")
 
 
 func _exit_tree() -> void:
 	if scene_changed.is_connected(_on_scene_changed):
 		scene_changed.disconnect(_on_scene_changed)
+	if scene_closed.is_connected(_on_scene_closed):
+		scene_closed.disconnect(_on_scene_closed)
+	if main_screen_changed.is_connected(_on_main_screen_changed):
+		main_screen_changed.disconnect(_on_main_screen_changed)
 
 	if _spatial_driver_btn != null:
 		remove_control_from_container(CONTAINER_SPATIAL_EDITOR_MENU, _spatial_driver_btn)
@@ -89,7 +95,23 @@ func _scene_saved(_filepath: String) -> void:
 
 func _on_scene_changed(scene_root: Node) -> void:
 	if _driver_io_dock != null:
-		_driver_io_dock.set_scene_root(scene_root)
+		var root: Node = scene_root
+		if root == null and Engine.is_editor_hint():
+			root = EditorInterface.get_edited_scene_root()
+		_driver_io_dock.set_scene_root(root)
+
+
+func _on_scene_closed(_filepath: String) -> void:
+	call_deferred("_sync_active_scene")
+
+
+func _on_main_screen_changed(_screen_name: String) -> void:
+	call_deferred("_sync_active_scene")
+
+
+func _sync_active_scene() -> void:
+	if _driver_io_dock != null and Engine.is_editor_hint():
+		_driver_io_dock.set_scene_root(EditorInterface.get_edited_scene_root())
 
 
 func _on_spatial_driver_btn_pressed() -> void:
@@ -99,4 +121,6 @@ func _on_spatial_driver_btn_pressed() -> void:
 		else:
 			_driver_editor_dock.show()
 	if _driver_io_dock != null:
+		if Engine.is_editor_hint():
+			_driver_io_dock.set_scene_root(EditorInterface.get_edited_scene_root())
 		_driver_io_dock.grab_focus()

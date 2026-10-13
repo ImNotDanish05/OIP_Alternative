@@ -46,8 +46,8 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 [sub_resource type="Resource" id="Resource_bg1ee"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
-length = 13.946860322679633
-metadata/_belt_conveyor_owner = 4692990052289
+length = 8.361934263075073
+metadata/_belt_conveyor_owner = 2860498620795
 
 [node name="Simulation" type="Node3D" unique_id=1619850740]
 
@@ -57,15 +57,15 @@ rules = Array[ExtResource("3_bg1ee")]([SubResource("Resource_4bf66"), SubResourc
 [node name="Player" parent="." unique_id=402586009 instance=ExtResource("4_fhdai")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
 
-[node name="BoxSpawner" parent="." unique_id=1009593353 instance=ExtResource("6_bg1ee")]
-transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -0.11936617, 1.6874429, 0.83692265)
-metadata/hijack_scale = true
-
 [node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("4_bg1ee")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.900726, 1.1203065, -0.099432945)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.411823, 1.1028862, -0.25337029)
 segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_bg1ee")])
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
-size = Vector3(14.44686, 0.5, 1.524)
+size = Vector3(8.861935, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
+
+[node name="BoxSpawner" parent="." unique_id=1009593353 instance=ExtResource("6_bg1ee")]
+transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -9.632692, 1.8383365, -0.21508518)
+metadata/hijack_scale = true
