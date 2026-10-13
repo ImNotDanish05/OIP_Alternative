@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://c2mdpkdnvow5w"]
 
 [ext_resource type="PackedScene" uid="uid://dyhvoundu2kqc" path="res://parts/Building.tscn" id="1_gcniq"]
-[ext_resource type="Script" uid="uid://b0216dkga4vul" path="res://parts/building.gd" id="2_ew68b"]
 [ext_resource type="Script" uid="uid://1it35d0vq4ou" path="res://parts/building_wall_rule.gd" id="3_bg1ee"]
+[ext_resource type="PackedScene" uid="uid://dm55h6ap605bw" path="res://parts/BeltConveyor.tscn" id="4_bg1ee"]
 [ext_resource type="PackedScene" uid="uid://bp5sxcp134uj2" path="res://parts/Player.tscn" id="4_fhdai"]
+[ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="5_fhdai"]
+[ext_resource type="PackedScene" uid="uid://co2mqmdwpn57w" path="res://parts/BoxSpawner.tscn" id="6_bg1ee"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
 script = ExtResource("3_bg1ee")
@@ -41,18 +43,29 @@ start = 2
 door_count = 2
 metadata/_custom_type_script = "uid://1it35d0vq4ou"
 
+[sub_resource type="Resource" id="Resource_bg1ee"]
+resource_local_to_scene = true
+script = ExtResource("5_fhdai")
+length = 13.946860322679633
+metadata/_belt_conveyor_owner = 4692990052289
+
 [node name="Simulation" type="Node3D" unique_id=1619850740]
 
-[node name="Building" type="Node3D" parent="." unique_id=183560046 instance=ExtResource("1_gcniq")]
-script = ExtResource("2_ew68b")
-width_sections = 5
-length_sections = 4
-default_wall = 3
+[node name="Building" parent="." unique_id=183560046 instance=ExtResource("1_gcniq")]
 rules = Array[ExtResource("3_bg1ee")]([SubResource("Resource_4bf66"), SubResource("Resource_ymq1x"), SubResource("Resource_2wb5a"), SubResource("Resource_522rc"), SubResource("Resource_wqnqx")])
-shadow_quality = 2
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=402586009 groups=["player"] instance=ExtResource("4_fhdai")]
+[node name="Player" parent="." unique_id=402586009 instance=ExtResource("4_fhdai")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
-collision_layer = 2
-collision_mask = 31
-floor_constant_speed = true
+
+[node name="BoxSpawner" parent="." unique_id=1009593353 instance=ExtResource("6_bg1ee")]
+transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -0.11936617, 1.6874429, 0.83692265)
+metadata/hijack_scale = true
+
+[node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("4_bg1ee")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.900726, 1.1203065, -0.099432945)
+segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_bg1ee")])
+speed_tag_group_name = "OpenPLC"
+running_tag_group_name = "OpenPLC"
+size = Vector3(14.44686, 0.5, 1.524)
+metadata/hijack_scale = true
+metadata/_snap_transform = Callable()
