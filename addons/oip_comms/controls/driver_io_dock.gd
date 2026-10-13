@@ -62,11 +62,22 @@ func _on_scene_tree_changed() -> void:
 
 
 func _build_ui() -> void:
-	# 1. Main Toolbar
+	# 1. Main Toolbar wrapped in horizontal scroll so it never forces minimum width on editor window
+	var toolbar_scroll := ScrollContainer.new()
+	toolbar_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	toolbar_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	toolbar_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	toolbar_scroll.custom_minimum_size = Vector2(0, 36)
+	add_child(toolbar_scroll)
+
 	var toolbar := HBoxContainer.new()
 	toolbar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	toolbar.add_theme_constant_override("separation", 8)
-	add_child(toolbar)
+	toolbar_scroll.add_child(toolbar)
+
+	toolbar_scroll.resized.connect(func() -> void:
+		toolbar.custom_minimum_size.x = maxf(0.0, toolbar_scroll.size.x)
+	)
 
 	# Active Scene Label
 	var scene_icon := Label.new()
@@ -75,6 +86,9 @@ func _build_ui() -> void:
 
 	_scene_label = Label.new()
 	_scene_label.text = "[No Active Scene]"
+	_scene_label.clip_text = true
+	_scene_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_scene_label.custom_minimum_size = Vector2(80, 0)
 	_scene_label.add_theme_color_override("font_color", Color(0.4, 0.8, 1.0))
 	toolbar.add_child(_scene_label)
 
@@ -99,7 +113,9 @@ func _build_ui() -> void:
 	toolbar.add_child(driver_title)
 
 	_driver_select = OptionButton.new()
-	_driver_select.custom_minimum_size = Vector2(110, 0)
+	_driver_select.custom_minimum_size = Vector2(90, 0)
+	_driver_select.fit_to_longest_item = false
+	_driver_select.clip_text = true
 	_driver_select.tooltip_text = "Select default communication driver / tag group"
 	toolbar.add_child(_driver_select)
 
@@ -140,7 +156,7 @@ func _build_ui() -> void:
 	# Search / Filter LineEdit
 	_search_edit = LineEdit.new()
 	_search_edit.placeholder_text = "Filter nodes / tags..."
-	_search_edit.custom_minimum_size = Vector2(170, 0)
+	_search_edit.custom_minimum_size = Vector2(130, 0)
 	_search_edit.clear_button_enabled = true
 	_search_edit.text_changed.connect(_on_search_text_changed)
 	toolbar.add_child(_search_edit)
@@ -159,6 +175,8 @@ func _build_ui() -> void:
 	_empty_label.text = "No simulation scene currently open.\nOpen a scene (.tscn) in the editor to configure its Input and Output driver variables."
 	_empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_empty_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_empty_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_empty_label.clip_text = true
 	_empty_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_empty_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_empty_label.visible = false
@@ -166,12 +184,12 @@ func _build_ui() -> void:
 
 	# Left Column: INPUTS
 	var left_panel := _create_column_panel("📥 INPUTS (Plant ➔ Driver / PLC)", Color(0.2, 0.7, 0.4))
-	_inputs_container = left_panel.get_node("ScrollContainer/Rows") as VBoxContainer
+	_inputs_container = left_panel.find_child("Rows", true, false) as VBoxContainer
 	_split_container.add_child(left_panel)
 
 	# Right Column: OUTPUTS
 	var right_panel := _create_column_panel("📤 OUTPUTS (Driver / PLC ➔ Plant)", Color(0.9, 0.6, 0.2))
-	_outputs_container = right_panel.get_node("ScrollContainer/Rows") as VBoxContainer
+	_outputs_container = right_panel.find_child("Rows", true, false) as VBoxContainer
 	_split_container.add_child(right_panel)
 
 	add_child(HSeparator.new())
@@ -183,6 +201,9 @@ func _build_ui() -> void:
 
 	_status_label = Label.new()
 	_status_label.text = "Ready."
+	_status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	_status_label.clip_text = true
 	_status_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	footer.add_child(_status_label)
 
@@ -191,7 +212,7 @@ func _create_column_panel(title_text: String, header_color: Color) -> VBoxContai
 	var col := VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	col.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	col.custom_minimum_size = Vector2(300, 100)
+	col.custom_minimum_size = Vector2(0, 0)
 
 	# Header bar
 	var header_panel := PanelContainer.new()
@@ -200,67 +221,92 @@ func _create_column_panel(title_text: String, header_color: Color) -> VBoxContai
 
 	var title_lbl := Label.new()
 	title_lbl.text = title_text
+	title_lbl.clip_text = true
+	title_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_lbl.add_theme_color_override("font_color", header_color)
 	header_box.add_child(title_lbl)
 
 	header_panel.add_child(header_box)
 	col.add_child(header_panel)
 
+	# Scroll Container for table (headers + rows)
+	var scroll := ScrollContainer.new()
+	scroll.name = "ScrollContainer"
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.custom_minimum_size = Vector2(0, 60)
+
+	var table_box := VBoxContainer.new()
+	table_box.name = "Table"
+	table_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	table_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	table_box.add_theme_constant_override("separation", 4)
+	scroll.add_child(table_box)
+
+	scroll.resized.connect(func() -> void:
+		table_box.custom_minimum_size.x = maxf(0.0, scroll.size.x)
+	)
+
 	# Column table header labels
 	var cols_header := HBoxContainer.new()
+	cols_header.name = "Header"
+	cols_header.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols_header.add_theme_constant_override("separation", 6)
 
 	var lbl_node := Label.new()
 	lbl_node.text = "Node"
 	lbl_node.custom_minimum_size = Vector2(130, 0)
+	lbl_node.clip_text = true
 	lbl_node.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cols_header.add_child(lbl_node)
 
 	var lbl_role := Label.new()
 	lbl_role.text = "Channel / Role"
 	lbl_role.custom_minimum_size = Vector2(90, 0)
+	lbl_role.clip_text = true
 	lbl_role.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cols_header.add_child(lbl_role)
 
 	var lbl_group := Label.new()
 	lbl_group.text = "Tag Group"
 	lbl_group.custom_minimum_size = Vector2(100, 0)
+	lbl_group.clip_text = true
 	lbl_group.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cols_header.add_child(lbl_group)
 
 	var lbl_tag := Label.new()
 	lbl_tag.text = "Tag / Variable"
-	lbl_tag.custom_minimum_size = Vector2(90, 0)
+	lbl_tag.custom_minimum_size = Vector2(85, 0)
+	lbl_tag.clip_text = true
 	lbl_tag.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cols_header.add_child(lbl_tag)
 
 	var lbl_type := Label.new()
 	lbl_type.text = "Type"
-	lbl_type.custom_minimum_size = Vector2(55, 0)
+	lbl_type.custom_minimum_size = Vector2(50, 0)
+	lbl_type.clip_text = true
 	lbl_type.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cols_header.add_child(lbl_type)
 
 	var lbl_comms := Label.new()
 	lbl_comms.text = "Comms"
-	lbl_comms.custom_minimum_size = Vector2(50, 0)
+	lbl_comms.custom_minimum_size = Vector2(40, 0)
+	lbl_comms.clip_text = true
 	lbl_comms.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	cols_header.add_child(lbl_comms)
 
-	col.add_child(cols_header)
-	col.add_child(HSeparator.new())
-
-	# Scroll Container for rows
-	var scroll := ScrollContainer.new()
-	scroll.name = "ScrollContainer"
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.custom_minimum_size = Vector2(0, 100)
+	table_box.add_child(cols_header)
+	table_box.add_child(HSeparator.new())
 
 	var rows_box := VBoxContainer.new()
 	rows_box.name = "Rows"
 	rows_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rows_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	rows_box.add_theme_constant_override("separation", 4)
-	scroll.add_child(rows_box)
+	table_box.add_child(rows_box)
 
 	col.add_child(scroll)
 	return col
@@ -621,7 +667,10 @@ func _create_row(item: Dictionary, parent_container: Control, groups: Array[Stri
 		return
 
 	var row_panel := PanelContainer.new()
+	row_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
 	var row_box := HBoxContainer.new()
+	row_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row_box.add_theme_constant_override("separation", 6)
 
 	# 1. Node Select Button
@@ -629,6 +678,7 @@ func _create_row(item: Dictionary, parent_container: Control, groups: Array[Stri
 	node_btn.text = item.node_name as String
 	node_btn.custom_minimum_size = Vector2(130, 0)
 	node_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	node_btn.clip_text = true
 	node_btn.tooltip_text = "Click to focus & select '%s' in 3D viewport" % (item.node_name as String)
 	node_btn.pressed.connect(func() -> void:
 		_select_node_in_editor(target_node)
@@ -639,6 +689,8 @@ func _create_row(item: Dictionary, parent_container: Control, groups: Array[Stri
 	var role_lbl := Label.new()
 	role_lbl.text = item.role as String
 	role_lbl.custom_minimum_size = Vector2(90, 0)
+	role_lbl.clip_text = true
+	role_lbl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var is_input: bool = (item.direction as String) == "INPUT"
 	role_lbl.add_theme_color_override("font_color", Color(0.3, 0.85, 0.5) if is_input else Color(1.0, 0.7, 0.3))
 	row_box.add_child(role_lbl)
@@ -646,6 +698,8 @@ func _create_row(item: Dictionary, parent_container: Control, groups: Array[Stri
 	# 3. Tag Group OptionButton
 	var group_opt := OptionButton.new()
 	group_opt.custom_minimum_size = Vector2(100, 0)
+	group_opt.fit_to_longest_item = false
+	group_opt.clip_text = true
 	group_opt.add_item("(None)")
 	for g: String in groups:
 		group_opt.add_item(g)
@@ -672,7 +726,7 @@ func _create_row(item: Dictionary, parent_container: Control, groups: Array[Stri
 
 	# 4. Tag / Variable Name LineEdit
 	var tag_edit := LineEdit.new()
-	tag_edit.custom_minimum_size = Vector2(90, 0)
+	tag_edit.custom_minimum_size = Vector2(85, 0)
 	tag_edit.placeholder_text = "co0, di1..."
 	tag_edit.text = String(target_node.get(item.tag_prop as String))
 	tag_edit.text_changed.connect(func(new_text: String) -> void:
@@ -685,13 +739,14 @@ func _create_row(item: Dictionary, parent_container: Control, groups: Array[Stri
 	# 5. Data Type Badge
 	var type_lbl := Label.new()
 	type_lbl.text = item.data_type as String
-	type_lbl.custom_minimum_size = Vector2(55, 0)
+	type_lbl.custom_minimum_size = Vector2(50, 0)
+	type_lbl.clip_text = true
 	type_lbl.add_theme_color_override("font_color", Color(0.6, 0.7, 0.9))
 	row_box.add_child(type_lbl)
 
 	# 6. Enable Comms CheckBox
 	var comms_check := CheckBox.new()
-	comms_check.custom_minimum_size = Vector2(50, 0)
+	comms_check.custom_minimum_size = Vector2(40, 0)
 	if "enable_comms" in target_node:
 		comms_check.button_pressed = bool(target_node.get("enable_comms"))
 	else:
@@ -863,6 +918,8 @@ func _refresh_known_tag_groups() -> void:
 		cur_sel = _driver_select.get_item_text(_driver_select.selected)
 
 	_driver_select.clear()
+	_driver_select.fit_to_longest_item = false
+	_driver_select.clip_text = true
 	_driver_select.add_item("(None)")
 	for g: String in groups:
 		_driver_select.add_item(g)

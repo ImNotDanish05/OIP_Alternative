@@ -32,7 +32,7 @@ func _enter_tree() -> void:
 	_driver_editor_dock = EditorDock.new()
 	_driver_editor_dock.name = DRIVER_DOCK_NAME
 	_driver_editor_dock.default_slot = EditorDock.DOCK_SLOT_BOTTOM
-	_driver_editor_dock.available_layouts = EditorDock.DOCK_LAYOUT_ALL
+	_driver_editor_dock.available_layouts = EditorDock.DOCK_LAYOUT_HORIZONTAL | EditorDock.DOCK_LAYOUT_FLOATING
 	_driver_editor_dock.add_child(_driver_io_dock)
 	add_dock(_driver_editor_dock)
 
@@ -94,6 +94,9 @@ func _on_scene_changed(scene_root: Node) -> void:
 
 func _on_spatial_driver_btn_pressed() -> void:
 	if _driver_editor_dock != null:
-		_driver_editor_dock.show()
+		if _driver_editor_dock.has_method("make_visible"):
+			_driver_editor_dock.make_visible()
+		else:
+			_driver_editor_dock.show()
 	if _driver_io_dock != null:
 		_driver_io_dock.grab_focus()
