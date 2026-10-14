@@ -7,6 +7,11 @@ class_name InteractionHUD
 ## - Handles Right-Click (RMB) / E key to operate the interactable part (`use()`).
 
 var _current_target: Node = null
+var _current_box: Box = null
+var _held_box: Box = null
+var _held_body: RigidBody3D = null
+var _hold_distance: float = 2.2
+var _is_holding: bool = false
 var _last_hit_position: Vector3 = Vector3.ZERO
 var _is_player_mode: bool = false
 var _player_body: CharacterBody3D = null
@@ -28,6 +33,8 @@ func _ready() -> void:
 
 
 func set_player_mode(is_player: bool, player_node: Node = null) -> void:
+	if _is_holding:
+		_stop_holding_box()
 	_is_player_mode = is_player
 	if player_node is CharacterBody3D:
 		_player_body = player_node as CharacterBody3D
@@ -56,7 +63,45 @@ func _process(_delta: float) -> void:
 func _physics_process(_delta: float) -> void:
 	var camera: Camera3D = get_viewport().get_camera_3d()
 	if camera == null:
+		if _is_holding:
+			_stop_holding_box()
 		_clear_target()
+		return
+
+	# Handle physics hold if currently carrying a box
+	if _is_holding:
+		if not is_instance_valid(_held_body) or not is_instance_valid(_held_box):
+			_stop_holding_box()
+			return
+
+		var target_pos: Vector3 = Vector3.ZERO
+		if _is_player_mode:
+			target_pos = camera.global_position - camera.global_transform.basis.z * _hold_distance
+		else:
+			var mouse_pos: Vector2 = get_viewport().get_mouse_position()
+			target_pos = camera.project_ray_origin(mouse_pos) + camera.project_ray_normal(mouse_pos) * _hold_distance
+
+		var to_target: Vector3 = target_pos - _held_body.global_position
+		var dist: float = to_target.length()
+
+		if dist > 6.0:
+			_stop_holding_box()
+			return
+
+		var pull_strength: float = 16.0
+		var desired_vel: Vector3 = to_target * pull_strength
+		var max_speed: float = 20.0
+		if desired_vel.length() > max_speed:
+			desired_vel = desired_vel.normalized() * max_speed
+
+		_held_body.linear_velocity = desired_vel
+		_held_body.angular_velocity = _held_body.angular_velocity * 0.82
+
+		_last_hit_position = _held_body.global_position
+		_update_holding_tooltip()
+		_update_tooltip_position(camera, _last_hit_position)
+		if _crosshair:
+			_crosshair.queue_redraw()
 		return
 
 	var space: PhysicsDirectSpaceState3D = camera.get_world_3d().direct_space_state
@@ -90,20 +135,58 @@ func _physics_process(_delta: float) -> void:
 		return
 
 	var collider: Object = hit["collider"]
-	var interactable: Node = _resolve_interactable(collider)
+	var box: Box = _resolve_box(collider)
+	_current_box = box
 
-	if interactable != null and interactable.has_method("use"):
-		_current_target = interactable
+	if box != null:
+		_current_target = box
 		_last_hit_position = hit["position"] as Vector3
 		_update_tooltip_content(_current_target)
 		_update_tooltip_position(camera, _last_hit_position)
 		if _crosshair:
 			_crosshair.queue_redraw()
 	else:
-		_clear_target()
+		var interactable: Node = _resolve_interactable(collider)
+		if interactable != null and interactable.has_method("use"):
+			_current_target = interactable
+			_last_hit_position = hit["position"] as Vector3
+			_update_tooltip_content(_current_target)
+			_update_tooltip_position(camera, _last_hit_position)
+			if _crosshair:
+				_crosshair.queue_redraw()
+		else:
+			_clear_target()
 
 
 func _input(event: InputEvent) -> void:
+	# 1. While holding a box, mouse wheel adjusts distance
+	if _is_holding and event is InputEventMouseButton and event.pressed:
+		var mb_wheel: InputEventMouseButton = event as InputEventMouseButton
+		if mb_wheel.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_hold_distance = clampf(_hold_distance + 0.25, 1.2, 5.0)
+			get_viewport().set_input_as_handled()
+			return
+		elif mb_wheel.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_hold_distance = clampf(_hold_distance - 0.25, 1.2, 5.0)
+			get_viewport().set_input_as_handled()
+			return
+
+	# 2. Right Click Hold / Release for Box
+	if event is InputEventMouseButton:
+		var mb: InputEventMouseButton = event as InputEventMouseButton
+		if mb.button_index == MOUSE_BUTTON_RIGHT:
+			if mb.pressed:
+				if _current_box != null and is_instance_valid(_current_box):
+					_start_holding_box(_current_box)
+					get_viewport().set_input_as_handled()
+					return
+			else:
+				if _is_holding:
+					_stop_holding_box()
+					get_viewport().set_input_as_handled()
+					return
+
+	# 3. Normal interactive component use
 	if _current_target == null or not is_instance_valid(_current_target):
 		return
 
@@ -111,10 +194,9 @@ func _input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.pressed:
 		var mb: InputEventMouseButton = event as InputEventMouseButton
-		if mb.button_index == MOUSE_BUTTON_RIGHT:
+		if mb.button_index == MOUSE_BUTTON_RIGHT and not (_current_target is Box):
 			should_interact = true
-		elif mb.button_index == MOUSE_BUTTON_LEFT and not _is_player_mode:
-			# In free editor camera mode, left-click can also click 3D buttons
+		elif mb.button_index == MOUSE_BUTTON_LEFT and not _is_player_mode and not (_current_target is Box):
 			should_interact = true
 
 	elif event is InputEventKey and event.pressed and not event.echo:
@@ -128,6 +210,92 @@ func _input(event: InputEvent) -> void:
 			# Immediate visual feedback on tooltip
 			_update_tooltip_content(_current_target)
 			get_viewport().set_input_as_handled()
+
+
+func _start_holding_box(box: Box) -> void:
+	if box == null or not is_instance_valid(box):
+		return
+
+	var rb: RigidBody3D = box.get_node_or_null("RigidBody3D") as RigidBody3D
+	if rb == null:
+		return
+
+	_held_box = box
+	_held_body = rb
+	_held_body.freeze = false
+	_held_body.sleeping = false
+
+	if _player_body and is_instance_valid(_player_body):
+		_held_body.add_collision_exception_with(_player_body)
+
+	var camera: Camera3D = get_viewport().get_camera_3d()
+	if camera:
+		var dist: float = camera.global_position.distance_to(_held_body.global_position)
+		_hold_distance = clampf(dist, 1.8, 3.5)
+	else:
+		_hold_distance = 2.2
+
+	_held_body.angular_velocity = Vector3.ZERO
+	_is_holding = true
+	_update_holding_tooltip()
+	if _crosshair:
+		_crosshair.queue_redraw()
+
+
+func _stop_holding_box() -> void:
+	if _is_holding and is_instance_valid(_held_body):
+		if _player_body and is_instance_valid(_player_body):
+			_held_body.remove_collision_exception_with(_player_body)
+		_held_body.linear_velocity = _held_body.linear_velocity.clamp(Vector3(-10, -10, -10), Vector3(10, 10, 10))
+
+	_held_box = null
+	_held_body = null
+	_is_holding = false
+
+	if _crosshair:
+		_crosshair.queue_redraw()
+	_clear_target()
+
+
+func _update_holding_tooltip() -> void:
+	if not _is_holding or not is_instance_valid(_held_box):
+		return
+
+	var box_name: String = String(_held_box.name)
+	if "BoxSmall" in box_name:
+		box_name = "Small Box"
+	elif "BoxLarge" in box_name:
+		box_name = "Large Box"
+	else:
+		box_name = "Cardboard Box"
+
+	if _title_label:
+		_title_label.text = "Holding: %s" % box_name
+	if _desc_label:
+		_desc_label.text = "Carrying physics box. Release Right Click to drop."
+	if _state_label:
+		_state_label.text = "Distance: %.1fm (Scroll Wheel to adjust)" % _hold_distance
+	if _action_label:
+		_action_label.text = "👉 [Release Right Click] Drop Box"
+	if _accent_bar:
+		_accent_bar.color = Color(0.2, 0.85, 1.0)
+
+
+func _resolve_box(collider: Object) -> Box:
+	if collider == null:
+		return null
+	if collider is Box:
+		return collider as Box
+	var node: Node = collider as Node
+	var scene_root: Node = get_tree().current_scene
+	var tree_root: Node = get_tree().root
+
+	while node and node != scene_root and node != tree_root:
+		if node is Box:
+			return node as Box
+		node = node.get_parent()
+
+	return null
 
 
 func _resolve_interactable(collider: Object) -> Node:
@@ -144,8 +312,9 @@ func _resolve_interactable(collider: Object) -> Node:
 
 
 func _clear_target() -> void:
-	var had_target: bool = (_current_target != null)
+	var had_target: bool = (_current_target != null or _current_box != null)
 	_current_target = null
+	_current_box = null
 	_set_tooltip_visible(false)
 	if had_target and _crosshair:
 		_crosshair.queue_redraw()
@@ -211,6 +380,8 @@ func _update_tooltip_content(target: Node) -> void:
 	if _accent_bar:
 		if info.has("accent_color") and info["accent_color"] is Color:
 			_accent_bar.color = info["accent_color"] as Color
+		elif target is Box:
+			_accent_bar.color = Color(1.0, 0.72, 0.2)
 		elif target is PushButton:
 			var pb: PushButton = target as PushButton
 			_accent_bar.color = pb.button_color if pb.pressed else Color(0.2, 0.6, 1.0)
@@ -224,7 +395,21 @@ func _get_default_interaction_info(target: Node) -> Dictionary:
 	var t_state: String = "State: STANDBY"
 	var t_action: String = "Right Click to Operate"
 
-	if target.is_class("BladeStop") or (target.get_script() != null and "blade_stop" in (target.get_script() as Script).resource_path):
+	if target is Box:
+		var b_name: String = String(target.name)
+		if "BoxSmall" in b_name or "Small" in b_name:
+			t_name = "Small Box [%s]" % b_name
+			t_desc = "Compact cardboard box for sorting."
+		elif "BoxLarge" in b_name or "Large" in b_name:
+			t_name = "Large Box [%s]" % b_name
+			t_desc = "Heavy-duty cardboard box for bulk goods."
+		else:
+			t_name = "Cardboard Box [%s]" % b_name
+			t_desc = "Standard corrugated cardboard container."
+		t_state = "State: MOVABLE OBJECT"
+		t_action = "Hold Right Click to Pick Up"
+
+	elif target.is_class("BladeStop") or (target.get_script() != null and "blade_stop" in (target.get_script() as Script).resource_path):
 		t_name = "Blade Stop [%s]" % String(target.name)
 		t_desc = "Pneumatic stopper to hold boxes/pallets on conveyor."
 		var is_active: bool = bool(target.get("active"))
@@ -363,11 +548,22 @@ func _on_crosshair_draw() -> void:
 	var center: Vector2 = get_viewport().get_visible_rect().size / 2.0
 	var is_focused: bool = (_current_target != null)
 
-	if is_focused:
-		# Focused on interactable: larger bright green/amber reticle
-		var ring_color: Color = Color(0.2, 1.0, 0.5, 0.95)
-		_crosshair.draw_arc(center, 6.0, 0.0, TAU, 16, ring_color, 1.5)
-		_crosshair.draw_circle(center, 2.0, ring_color)
+	if _is_holding:
+		# Holding an object: cyan reticle ring + center dot
+		var hold_color: Color = Color(0.2, 0.85, 1.0, 0.95)
+		_crosshair.draw_arc(center, 7.0, 0.0, TAU, 16, hold_color, 2.0)
+		_crosshair.draw_circle(center, 2.5, hold_color)
+	elif is_focused:
+		if _current_box != null:
+			# Aiming at a Box: warm amber reticle indicating grabbable
+			var box_color: Color = Color(1.0, 0.75, 0.2, 0.95)
+			_crosshair.draw_arc(center, 6.0, 0.0, TAU, 16, box_color, 1.8)
+			_crosshair.draw_circle(center, 2.0, box_color)
+		else:
+			# Focused on interactable: bright green reticle
+			var ring_color: Color = Color(0.2, 1.0, 0.5, 0.95)
+			_crosshair.draw_arc(center, 6.0, 0.0, TAU, 16, ring_color, 1.5)
+			_crosshair.draw_circle(center, 2.0, ring_color)
 	else:
 		# Standby: subtle clean white dot
 		var dot_color: Color = Color(1.0, 1.0, 1.0, 0.65)
