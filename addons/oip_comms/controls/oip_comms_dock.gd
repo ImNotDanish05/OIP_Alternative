@@ -27,6 +27,7 @@ var changes_present := false
 var settings_config: ConfigFile = ConfigFile.new()
 var tag_groups_config: ConfigFile = ConfigFile.new()
 var _service: Node
+var _comms_error_dialog: AcceptDialog = null
 
 func _ready() -> void:
 	var oip_data_path := ProjectSettings.globalize_path("res://oip_data")
@@ -224,13 +225,31 @@ func _on_comms_error() -> void:
 
 func _show_comms_error() -> void:
 	var msg: String = OIPComms.get_comms_error()
-	var dialog := AcceptDialog.new()
-	dialog.title = "OIP Comms Error"
-	dialog.dialog_text = msg
-	dialog.confirmed.connect(dialog.queue_free)
-	dialog.canceled.connect(dialog.queue_free)
-	add_child(dialog)
-	dialog.popup_centered()
+	if msg.is_empty():
+		return
+	if not is_inside_tree() or not is_visible_in_tree():
+		return
+	if is_instance_valid(_comms_error_dialog) and _comms_error_dialog.visible:
+		return
+
+	if is_instance_valid(_comms_error_dialog):
+		_comms_error_dialog.dialog_text = msg
+		_comms_error_dialog.popup_centered()
+		return
+
+	_comms_error_dialog = AcceptDialog.new()
+	_comms_error_dialog.title = "OIP Comms Error"
+	_comms_error_dialog.dialog_text = msg
+	_comms_error_dialog.confirmed.connect(func() -> void:
+		if is_instance_valid(_comms_error_dialog):
+			_comms_error_dialog.hide()
+	)
+	_comms_error_dialog.canceled.connect(func() -> void:
+		if is_instance_valid(_comms_error_dialog):
+			_comms_error_dialog.hide()
+	)
+	add_child(_comms_error_dialog)
+	_comms_error_dialog.popup_centered()
 
 func save_settings() -> void:
 	settings_config.set_value("settings", "enable_comms", enable_comms.button_pressed)

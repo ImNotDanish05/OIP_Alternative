@@ -42,6 +42,31 @@ func _ready() -> void:
 	_current_target_host = host
 
 
+func _exit_tree() -> void:
+	disconnect_from_plc()
+
+
+func _reset_connection() -> void:
+	_is_connected = false
+	_rx_buffer.clear()
+	_active_requests.clear()
+	_poll_accumulator = 0.0
+	if _tcp != null:
+		_tcp.disconnect_from_host()
+	_tcp = StreamPeerTCP.new()
+
+
+func _on_connection_lost(reason: String = "") -> void:
+	if _is_connected:
+		_is_connected = false
+		if not reason.is_empty():
+			print("ModbusClient [%s]: Disconnected from %s:%d (%s)" % [group_name, _current_target_host, port, reason])
+		else:
+			print("ModbusClient [%s]: Disconnected from %s:%d" % [group_name, _current_target_host, port])
+		disconnected_from_plc.emit(group_name)
+	_reset_connection()
+
+
 func _process(delta: float) -> void:
 	_tcp.poll()
 	var status: StreamPeerTCP.Status = _tcp.get_status()
@@ -49,9 +74,11 @@ func _process(delta: float) -> void:
 	if status == StreamPeerTCP.STATUS_CONNECTED:
 		if not _is_connected:
 			_is_connected = true
+			_poll_accumulator = 0.0
 			print("ModbusClient: Connected to %s:%d (group: '%s')" % [_current_target_host, port, group_name])
 			connected_to_plc.emit(group_name)
 			_flush_pending_writes()
+			return
 
 		# Read any available incoming data
 		var avail: int = _tcp.get_available_bytes()
@@ -60,6 +87,9 @@ func _process(delta: float) -> void:
 			if read_res[0] == OK:
 				_rx_buffer.append_array(read_res[1] as PackedByteArray)
 				_process_rx_buffer()
+			else:
+				_on_connection_lost("Socket read error %d" % int(read_res[0]))
+				return
 
 		# Handle polling timer
 		_poll_accumulator += delta
@@ -74,9 +104,7 @@ func _process(delta: float) -> void:
 	else:
 		# STATUS_NONE or STATUS_ERROR
 		if _is_connected:
-			_is_connected = false
-			print("ModbusClient: Disconnected from %s:%d (group: '%s')" % [_current_target_host, port, group_name])
-			disconnected_from_plc.emit(group_name)
+			_on_connection_lost("Socket status %d" % status)
 
 		_handle_reconnect(delta)
 
@@ -88,10 +116,8 @@ func connect_to_plc() -> void:
 
 
 func disconnect_from_plc() -> void:
-	_tcp.disconnect_from_host()
-	_is_connected = false
-	_rx_buffer.clear()
-	_active_requests.clear()
+	_pending_writes.clear()
+	_on_connection_lost("Disconnected explicitly")
 
 
 func is_connected_to_plc() -> bool:
@@ -99,12 +125,10 @@ func is_connected_to_plc() -> bool:
 
 
 func _do_connect(target_host: String, target_port: int) -> void:
-	_tcp.disconnect_from_host()
-	_rx_buffer.clear()
-	_active_requests.clear()
+	_reset_connection()
 	var err: Error = _tcp.connect_to_host(target_host, target_port)
 	if err != OK:
-		push_warning("ModbusClient: Could not initiate connection to %s:%d (%d)" % [target_host, target_port, err])
+		push_warning("ModbusClient [%s]: Could not initiate connection to %s:%d (error %d)" % [group_name, target_host, target_port, err])
 
 
 func _handle_reconnect(delta: float) -> void:
@@ -238,21 +262,21 @@ func _send_poll_requests() -> void:
 	if not coil_addrs.is_empty():
 		var min_a: int = int(coil_addrs.min())
 		var max_a: int = int(coil_addrs.max())
-		var count: int = max_a - min_a + 1
+		var count: int = mini(max_a - min_a + 1, 2000)
 		_send_modbus_read(1, min_a, count)
 
 	# Read discrete inputs
 	if not input_addrs.is_empty():
 		var min_a: int = int(input_addrs.min())
 		var max_a: int = int(input_addrs.max())
-		var count: int = max_a - min_a + 1
+		var count: int = mini(max_a - min_a + 1, 2000)
 		_send_modbus_read(2, min_a, count)
 
 	# Read holding registers
 	if not hr_addrs.is_empty():
 		var min_a: int = int(hr_addrs.min())
 		var max_a: int = int(hr_addrs.max())
-		var count: int = max_a - min_a + 1
+		var count: int = mini(max_a - min_a + 1, 125)
 		_send_modbus_read(3, min_a, count)
 
 
@@ -273,6 +297,16 @@ func _build_mbap(tx_id: int, pdu_len: int) -> PackedByteArray:
 	return buf
 
 
+func _send_packet(packet: PackedByteArray) -> bool:
+	if _tcp.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+		return false
+	var err: Error = _tcp.put_data(packet)
+	if err != OK:
+		_on_connection_lost("Failed to put_data (error %d)" % err)
+		return false
+	return true
+
+
 func _send_modbus_read(fc: int, start_addr: int, quantity: int) -> void:
 	if _tcp.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 		return
@@ -290,7 +324,7 @@ func _send_modbus_read(fc: int, start_addr: int, quantity: int) -> void:
 	packet.append_array(pdu)
 
 	_active_requests[tx] = {"fc": fc, "start": start_addr, "count": quantity}
-	_tcp.put_data(packet)
+	_send_packet(packet)
 
 
 func _send_modbus_write_coil(addr: int, value: bool) -> void:
@@ -313,7 +347,7 @@ func _send_modbus_write_coil(addr: int, value: bool) -> void:
 	packet.append_array(pdu)
 
 	_active_requests[tx] = {"fc": 5, "addr": addr}
-	_tcp.put_data(packet)
+	_send_packet(packet)
 
 
 func _send_modbus_write_float32(addr: int, value: float) -> void:
@@ -342,7 +376,7 @@ func _send_modbus_write_float32(addr: int, value: float) -> void:
 	packet.append_array(pdu)
 
 	_active_requests[tx] = {"fc": 16, "addr": addr}
-	_tcp.put_data(packet)
+	_send_packet(packet)
 
 
 func _send_modbus_write_int32(addr: int, value: int) -> void:
@@ -371,7 +405,7 @@ func _send_modbus_write_int32(addr: int, value: int) -> void:
 	packet.append_array(pdu)
 
 	_active_requests[tx] = {"fc": 16, "addr": addr}
-	_tcp.put_data(packet)
+	_send_packet(packet)
 
 
 func _send_modbus_write_int16(addr: int, value: int) -> void:
@@ -394,12 +428,16 @@ func _send_modbus_write_int16(addr: int, value: int) -> void:
 	packet.append_array(pdu)
 
 	_active_requests[tx] = {"fc": 6, "addr": addr}
-	_tcp.put_data(packet)
+	_send_packet(packet)
 
 
 func _flush_pending_writes() -> void:
-	while not _pending_writes.is_empty():
-		var w: Dictionary = _pending_writes.pop_front()
+	var pending_copy: Array[Dictionary] = _pending_writes.duplicate()
+	_pending_writes.clear()
+	for w: Dictionary in pending_copy:
+		if _tcp.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+			_pending_writes.append(w)
+			break
 		match w.get("type", ""):
 			"coil": _send_modbus_write_coil(int(w.addr), bool(w.val))
 			"float32": _send_modbus_write_float32(int(w.addr), float(w.val))
@@ -410,6 +448,11 @@ func _flush_pending_writes() -> void:
 func _process_rx_buffer() -> void:
 	while _rx_buffer.size() >= 7:
 		var pdu_len: int = (_rx_buffer[4] << 8) | _rx_buffer[5]
+		if pdu_len < 2 or pdu_len > 300:
+			push_warning("ModbusClient [%s]: Invalid Modbus PDU length (%d). Resetting RX buffer." % [group_name, pdu_len])
+			_rx_buffer.clear()
+			break
+
 		var total_len: int = 6 + pdu_len # 6 bytes MBAP + pdu_len
 		if _rx_buffer.size() < total_len:
 			break # Wait for remaining packet data
@@ -439,8 +482,10 @@ func _handle_response(packet: PackedByteArray) -> void:
 		if packet.size() < 9:
 			return
 		var byte_count: int = packet[8]
-		var start: int = req_info.get("start", 0)
-		var count: int = req_info.get("count", 0)
+		if packet.size() < 9 + byte_count:
+			return
+		var start: int = int(req_info.get("start", 0))
+		var count: int = int(req_info.get("count", 0))
 		var prefix: String = "co" if fc == 1 else "di"
 
 		for i: int in range(count):
@@ -464,7 +509,9 @@ func _handle_response(packet: PackedByteArray) -> void:
 		if packet.size() < 9:
 			return
 		var byte_count: int = packet[8]
-		var start: int = req_info.get("start", 0)
+		if packet.size() < 9 + byte_count:
+			return
+		var start: int = int(req_info.get("start", 0))
 		var reg_count: int = byte_count >> 1
 
 		for r: int in range(reg_count):
@@ -477,7 +524,7 @@ func _handle_response(packet: PackedByteArray) -> void:
 		# Update float32, int32, and int16 tags from holding registers
 		for tag: String in _registered_tags:
 			var info: Dictionary = _registered_tags[tag]
-			if info.get("prefix", "") != "hr":
+			if str(info.get("prefix", "")) != "hr":
 				continue
 			var tag_type: int = int(info.get("type", 0))
 			var addr: int = int(info.get("address", 0))
@@ -486,24 +533,27 @@ func _handle_response(packet: PackedByteArray) -> void:
 			if tag_type == OIPComms.TAG_TYPE_FLOAT32:
 				if rel_r >= 0 and rel_r + 1 < reg_count:
 					var b_idx: int = 9 + rel_r * 2
-					var spb := StreamPeerBuffer.new()
-					spb.big_endian = true
-					spb.data_array = packet.slice(b_idx, b_idx + 4)
-					_tag_values[tag] = spb.get_float()
+					if b_idx + 4 <= packet.size():
+						var spb := StreamPeerBuffer.new()
+						spb.big_endian = true
+						spb.data_array = packet.slice(b_idx, b_idx + 4)
+						_tag_values[tag] = spb.get_float()
 			elif tag_type == OIPComms.TAG_TYPE_INT32:
 				if rel_r >= 0 and rel_r + 1 < reg_count:
 					var b_idx: int = 9 + rel_r * 2
-					var spb := StreamPeerBuffer.new()
-					spb.big_endian = true
-					spb.data_array = packet.slice(b_idx, b_idx + 4)
-					_tag_values[tag] = spb.get_32()
+					if b_idx + 4 <= packet.size():
+						var spb := StreamPeerBuffer.new()
+						spb.big_endian = true
+						spb.data_array = packet.slice(b_idx, b_idx + 4)
+						_tag_values[tag] = spb.get_32()
 			elif tag_type == OIPComms.TAG_TYPE_INT16:
 				if rel_r >= 0 and rel_r < reg_count:
 					var b_idx: int = 9 + rel_r * 2
-					var spb := StreamPeerBuffer.new()
-					spb.big_endian = true
-					spb.data_array = packet.slice(b_idx, b_idx + 2)
-					_tag_values[tag] = spb.get_16()
+					if b_idx + 2 <= packet.size():
+						var spb := StreamPeerBuffer.new()
+						spb.big_endian = true
+						spb.data_array = packet.slice(b_idx, b_idx + 2)
+						_tag_values[tag] = spb.get_16()
 
 		tags_polled.emit(group_name)
 

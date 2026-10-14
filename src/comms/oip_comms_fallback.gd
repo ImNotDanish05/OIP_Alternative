@@ -22,6 +22,7 @@ static var _sim_running: bool = false
 static var _tag_groups: Array = []
 static var _tag_values: Dictionary = {}
 static var _modbus_clients: Dictionary = {}
+static var _last_comms_error: String = ""
 
 static var tag_groups_registered: Signal:
 	get:
@@ -133,7 +134,8 @@ static func register_tag_group(group_name: String, polling_rate: int, protocol: 
 			client.tags_polled.connect(func(g: String) -> void:
 				_instance.tag_group_polled_signal.emit(g)
 			)
-			client.disconnected_from_plc.connect(func(_g: String) -> void:
+			client.disconnected_from_plc.connect(func(g: String) -> void:
+				_last_comms_error = "Disconnected from PLC tag group '%s'" % g
 				_instance.comms_error_signal.emit()
 			)
 
@@ -380,7 +382,7 @@ static func get_comms_error() -> String:
 		var native: Object = Engine.get_singleton("OIPComms")
 		if native != _instance and native.has_method("get_comms_error"):
 			return String(native.call("get_comms_error"))
-	return ""
+	return _last_comms_error
 
 
 static func get_tag_groups() -> Array:
