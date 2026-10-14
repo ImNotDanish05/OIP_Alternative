@@ -15,6 +15,7 @@ size = Vector3(0.6, 0.4, 0.4)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ekrlf"]
 resource_name = "Material.001"
 vertex_color_use_as_albedo = true
+albedo_color = Color(0.74, 0.58, 0.38, 1)
 albedo_texture = ExtResource("2_bpads")
 metallic_texture = ExtResource("3_rqr71")
 metallic_texture_channel = 2
@@ -118,6 +119,7 @@ shadow_mesh = SubResource("ArrayMesh_jl6cr")
 top_level = true
 script = ExtResource("1_jl6cr")
 size = Vector3(0.6, 0.4, 0.4)
+color = Color(0.74, 0.58, 0.38, 1)
 
 [node name="RigidBody3D" type="RigidBody3D" parent="." unique_id=1929949017]
 process_mode = 3

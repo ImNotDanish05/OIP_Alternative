@@ -11,6 +11,7 @@
 resource_name = "Material.001"
 transparency = 4
 vertex_color_use_as_albedo = true
+albedo_color = Color(0.74, 0.58, 0.38, 1)
 albedo_texture = ExtResource("2_4vevq")
 metallic_texture = ExtResource("3_erpmv")
 metallic_texture_channel = 2
@@ -125,6 +126,7 @@ transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-
 script = ExtResource("1_hb8rk")
 scene = ExtResource("2_2xggy")
 size = Vector3(0.6, 0.4, 0.4)
+box_color = Color(0.74, 0.58, 0.38, 1)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1653744283]
 transform = Transform3D(0.3, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, 0, 0)

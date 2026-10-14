@@ -20,6 +20,7 @@ extends ResizableNode3D
 @export var box_color: Color = Color.WHITE:
 	set(value):
 		box_color = value
+		_update_preview_color()
 ## Mass applied to spawned boxes, in kilograms.
 @export_custom(PROPERTY_HINT_NONE, "suffix:kg") var mass: float = 10.0
 ## Initial velocity applied to spawned boxes.
@@ -106,7 +107,23 @@ func _ready() -> void:
 	Simulation.started.connect(_on_simulation_started)
 	Simulation.stopped.connect(_on_simulation_ended)
 	_on_size_changed()
+	_update_preview_color()
 	_change_texture()
+
+
+func _update_preview_color() -> void:
+	var mesh: MeshInstance3D = _preview_mesh if _preview_mesh else get_node_or_null("MeshInstance3D") as MeshInstance3D
+	if not mesh or not mesh.mesh:
+		return
+	var mat: StandardMaterial3D = mesh.get_surface_override_material(0) as StandardMaterial3D
+	if not mat:
+		var base: StandardMaterial3D = mesh.mesh.surface_get_material(0) as StandardMaterial3D
+		if base:
+			mat = base.duplicate() as StandardMaterial3D
+			mesh.set_surface_override_material(0, mat)
+	if mat:
+		mat.albedo_color = box_color
+
 
 func _on_size_changed() -> void:
 	if is_instance_valid(_preview_mesh):

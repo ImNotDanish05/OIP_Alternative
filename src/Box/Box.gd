@@ -14,13 +14,23 @@ extends ResizableNode3D
 @export var color: Color = Color.WHITE:
 	set(value):
 		color = value
-		if _mesh_instance_3d:
-			_mesh_instance_3d.set_surface_override_material(0, _get_shared_material(color))
+		_apply_material_color(color)
 
-static var _material_cache: Dictionary = {}
+static var _material_cache: Dictionary[String, StandardMaterial3D] = {}
 
-func _get_shared_material(c: Color) -> StandardMaterial3D:
-	var base: StandardMaterial3D = _mesh_instance_3d.mesh.surface_get_material(0)
+
+func _apply_material_color(c: Color) -> void:
+	var mesh_node: MeshInstance3D = _mesh_instance_3d if _mesh_instance_3d else get_node_or_null("RigidBody3D/MeshInstance3D") as MeshInstance3D
+	if mesh_node:
+		var mat: StandardMaterial3D = _get_shared_material(c, mesh_node)
+		if mat:
+			mesh_node.set_surface_override_material(0, mat)
+
+
+func _get_shared_material(c: Color, mesh_node: MeshInstance3D) -> StandardMaterial3D:
+	var base: StandardMaterial3D = null
+	if mesh_node and mesh_node.mesh:
+		base = mesh_node.mesh.surface_get_material(0) as StandardMaterial3D
 	var cache_key: String = "%d_%s" % [base.get_instance_id() if base else 0, c.to_html(true)]
 	if not _material_cache.has(cache_key):
 		var mat: StandardMaterial3D = base.duplicate() if base else StandardMaterial3D.new()
@@ -51,8 +61,7 @@ func _enter_tree() -> void:
 
 func _ready() -> void:
 	_on_size_changed()
-	if color != Color.WHITE:
-		set("color", color)
+	_apply_material_color(color)
 	_rigid_body_3d.mass = mass
 	_rigid_body_3d.freeze = not Simulation.is_running()
 	if Simulation.is_running():

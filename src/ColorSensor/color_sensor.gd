@@ -13,24 +13,22 @@ extends Node3D
 			if show_beam:
 				_beam_needs_update = true
 
+## Distance tolerance for matching detected colors against color_map (0.0 = exact match, 1.0 = very permissive).
+@export_range(0.0, 1.5, 0.05) var color_tolerance: float = 0.5
+
 ## The color currently detected by the sensor (read-only).
 @export var color_detected: Color = Color.BLACK:
 	set(value):
 		color_detected = value
-
-		if color_map.has(value):
-			color_value = color_map[value]
-		else:
-			color_value = 0
-
-		if _tag.is_ready():
-			_tag.write_int32(color_value)
+		color_value = _match_color_to_value(value)
 
 ## Maps detected colors to integer values for PLC communication.
 @export var color_map: Dictionary[Color, int] = {
 	Color.RED: 1,
 	Color.GREEN: 2,
-	Color.BLUE: 3
+	Color.BLUE: 3,
+	Color.YELLOW: 4,
+	Color(0.74, 0.58, 0.38): 5,
 }
 
 ## Integer value corresponding to detected color from color_map (read-only).
@@ -66,7 +64,7 @@ var _beam_needs_update: bool = true
 
 
 func _validate_property(property: Dictionary) -> void:
-	if property.name == "color_value":
+	if property.name == "color_value" or property.name == "color_detected":
 		property.usage = PROPERTY_USAGE_EDITOR | PROPERTY_USAGE_READ_ONLY
 	else:
 		OIPCommsSetup.validate_tag_property(property)
@@ -112,21 +110,15 @@ func _physics_process(_delta: float) -> void:
 
 	if has_detection:
 		result_distance = start_pos.distance_to(result["position"])
-		var collider: CollisionObject3D = result["collider"]
-		var mesh_instance: MeshInstance3D = collider.get_node("MeshInstance3D")
-		
-		var material: StandardMaterial3D = mesh_instance.get_surface_override_material(0)
-		if not material:
-			material = mesh_instance.mesh.surface_get_material(0)
-		
-		new_color = material.albedo_color
+		var collider: CollisionObject3D = result["collider"] as CollisionObject3D
+		new_color = _extract_collider_color(collider)
 	else:
 		new_color = Color.TRANSPARENT
 
 	if new_color != color_detected:
 		color_detected = new_color
 
-	var beam_color := new_color if new_color != Color.TRANSPARENT else Color.GREEN
+	var beam_color := new_color if new_color.a > 0.01 else Color.GREEN
 	var current_transform := global_transform
 	var beam_end := start_pos + dir * max_range
 	if _beam_needs_update or result_distance != _last_result_distance or beam_color != _last_beam_color or current_transform != _last_transform:
@@ -137,6 +129,57 @@ func _physics_process(_delta: float) -> void:
 		_last_beam_color = beam_color
 		_last_transform = current_transform
 		_beam_needs_update = false
+
+
+func _extract_collider_color(collider: CollisionObject3D) -> Color:
+	if not collider:
+		return Color.TRANSPARENT
+
+	if "color" in collider and collider.get("color") is Color:
+		return collider.get("color") as Color
+	var parent: Node = collider.get_parent()
+	if parent and "color" in parent and parent.get("color") is Color:
+		return parent.get("color") as Color
+
+	var mesh_instance: MeshInstance3D = collider.get_node_or_null("MeshInstance3D") as MeshInstance3D
+	if not mesh_instance and parent:
+		mesh_instance = parent.get_node_or_null("MeshInstance3D") as MeshInstance3D
+	if not mesh_instance:
+		mesh_instance = collider.find_child("*Mesh*", true, false) as MeshInstance3D
+
+	if mesh_instance:
+		var material: Material = mesh_instance.get_surface_override_material(0)
+		if not material and mesh_instance.mesh:
+			material = mesh_instance.mesh.surface_get_material(0)
+		if material is StandardMaterial3D:
+			return (material as StandardMaterial3D).albedo_color
+
+	return Color.TRANSPARENT
+
+
+func _match_color_to_value(c: Color) -> int:
+	if c.a <= 0.01:
+		return 0
+
+	var best_val: int = 0
+	var min_dist: float = INF
+
+	for target_color: Color in color_map:
+		var dist: float = _color_distance(c, target_color)
+		if dist < min_dist:
+			min_dist = dist
+			best_val = color_map[target_color]
+
+	if min_dist <= color_tolerance:
+		return best_val
+	return 0
+
+
+func _color_distance(c1: Color, c2: Color) -> float:
+	var dr: float = c1.r - c2.r
+	var dg: float = c1.g - c2.g
+	var db: float = c1.b - c2.b
+	return sqrt(dr * dr + dg * dg + db * db)
 
 
 func _update_beam_mesh(start_pos: Vector3, result_distance: float, beam_color: Color) -> void:
