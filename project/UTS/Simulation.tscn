@@ -7,6 +7,8 @@
 [ext_resource type="Script" uid="uid://dfskhbqfkklts" path="res://src/Conveyor/belt_segment.gd" id="5_fhdai"]
 [ext_resource type="PackedScene" uid="uid://co2mqmdwpn57w" path="res://parts/BoxSpawner.tscn" id="6_bg1ee"]
 [ext_resource type="PackedScene" uid="uid://6vu4cx2v1ltg" path="res://parts/CurvedBeltConveyor.tscn" id="7_itl1f"]
+[ext_resource type="PackedScene" uid="uid://5pjmdoyiub35" path="res://parts/Diverter.tscn" id="8_3fuit"]
+[ext_resource type="PackedScene" uid="uid://x7ajd6h1vd07" path="res://parts/ColorSensor.tscn" id="9_mjs7n"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
 script = ExtResource("3_bg1ee")
@@ -122,15 +124,25 @@ metadata/_snap_transform = Callable()
 
 [node name="BoxSpawner" parent="." unique_id=1009593353 instance=ExtResource("6_bg1ee")]
 transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -6.5651255, 2.35141, 4.889591)
-box_color = Color(0.5250519, 0.00010839045, 0.48551035, 1)
+box_color = Color(1, 0, 0, 1)
 spawn_interval = 2.0
 boxes_per_minute = 30
 metadata/hijack_scale = true
 
 [node name="BoxSpawner2" parent="." unique_id=156438263 instance=ExtResource("6_bg1ee")]
 transform = Transform3D(1, 2.30012e-09, -9.31322e-10, -2.30012e-09, 1, 8.84756e-09, 9.31322e-10, -8.84756e-09, 1, -6.5210576, 2.3502653, 5.0185466)
-box_color = Color(0.99999994, 0.26881856, 0.71913177, 1)
+box_color = Color(1, 1, 0, 1)
 start_delay = 1.0
 spawn_interval = 2.0
 boxes_per_minute = 30
 metadata/hijack_scale = true
+
+[node name="Diverter" parent="." unique_id=1865443018 instance=ExtResource("8_3fuit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.267013, 0.9979516, 6.8110127)
+tag_group_name = "OpenPLC"
+metadata/_snap_transform = Callable()
+
+[node name="ColorSensor" parent="." unique_id=2040135411 instance=ExtResource("9_mjs7n")]
+transform = Transform3D(-0.17391302, 0, -1.5203959e-08, 0, 0.173913, 0, 1.5203959e-08, 0, -0.17391302, 7.76888, 1.2152065, 5.8431573)
+tag_group_name = "OpenPLC"
+metadata/_snap_transform = Callable()
