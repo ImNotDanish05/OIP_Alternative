@@ -1497,96 +1497,6 @@ PROGRAM main
           "dragging": false
         },
         {
-          "id": "VARIABLE_f349df79-f1d1-4ddb-b833-aaf9effbf994",
-          "type": "variable",
-          "position": {
-            "x": 263,
-            "y": 74
-          },
-          "width": 80,
-          "height": 32,
-          "measured": {
-            "width": 80,
-            "height": 32
-          },
-          "data": {
-            "handles": [
-              {
-                "glbPosition": {
-                  "x": 263,
-                  "y": 90
-                },
-                "relPosition": {
-                  "x": 0,
-                  "y": 16
-                },
-                "id": "input",
-                "position": "left",
-                "isConnectable": false,
-                "type": "target"
-              }
-            ],
-            "inputHandles": [
-              {
-                "glbPosition": {
-                  "x": 263,
-                  "y": 90
-                },
-                "relPosition": {
-                  "x": 0,
-                  "y": 16
-                },
-                "id": "input",
-                "position": "left",
-                "isConnectable": false,
-                "type": "target"
-              }
-            ],
-            "outputHandles": [],
-            "inputConnector": {
-              "glbPosition": {
-                "x": 263,
-                "y": 90
-              },
-              "relPosition": {
-                "x": 0,
-                "y": 16
-              },
-              "id": "input",
-              "position": "left",
-              "isConnectable": false,
-              "type": "target"
-            },
-            "numericId": "1620508",
-            "variable": {
-              "id": "",
-              "name": ""
-            },
-            "executionOrder": 0,
-            "variant": "output",
-            "block": {
-              "id": "BLOCK_35680648-7708-400f-969c-65e4fb40ceba",
-              "handleId": "OUT",
-              "variableType": {
-                "name": "OUT",
-                "class": "output",
-                "type": {
-                  "definition": "base-type",
-                  "value": "BOOL"
-                }
-              }
-            },
-            "draggable": false,
-            "selectable": true,
-            "deletable": false
-          },
-          "deletable": false,
-          "selectable": true,
-          "draggable": false,
-          "selected": false,
-          "dragging": false
-        },
-        {
           "id": "VARIABLE_02381a8b-b2b6-4ee9-90ec-cc82dfb99d12",
           "type": "variable",
           "position": {
@@ -1784,7 +1694,7 @@ PROGRAM main
           "id": "e_BLOCK_35680648-7708-400f-969c-65e4fb40ceba_BLOCK_a7ddf577-49f5-40d5-a597-65ff86773736__OUT_IN",
           "source": "BLOCK_35680648-7708-400f-969c-65e4fb40ceba",
           "target": "BLOCK_a7ddf577-49f5-40d5-a597-65ff86773736",
-          "sourceHandle": "ENO",
+          "sourceHandle": "OUT",
           "targetHandle": "IN"
         },
         {
@@ -1807,13 +1717,6 @@ PROGRAM main
           "target": "BLOCK_35680648-7708-400f-969c-65e4fb40ceba",
           "sourceHandle": "output",
           "targetHandle": "IN2"
-        },
-        {
-          "id": "e_BLOCK_35680648-7708-400f-969c-65e4fb40ceba_VARIABLE_f349df79-f1d1-4ddb-b833-aaf9effbf994__OUT_input",
-          "source": "BLOCK_35680648-7708-400f-969c-65e4fb40ceba",
-          "target": "VARIABLE_f349df79-f1d1-4ddb-b833-aaf9effbf994",
-          "sourceHandle": "OUT",
-          "targetHandle": "input"
         },
         {
           "id": "e_VARIABLE_02381a8b-b2b6-4ee9-90ec-cc82dfb99d12_BLOCK_a7ddf577-49f5-40d5-a597-65ff86773736__output_PT",
