@@ -158,5 +158,5 @@ metadata/_snap_transform = Callable()
 transform = Transform3D(-0.17391302, 0, -1.5203959e-08, 0, 0.173913, 0, 1.5203959e-08, 0, -0.17391302, 8.036646, 1.2152065, 5.8431573)
 enable_comms = true
 tag_group_name = "OpenPLC"
-tag_name = "hr1"
+tag_name = "hr0"
 metadata/_snap_transform = Callable()
