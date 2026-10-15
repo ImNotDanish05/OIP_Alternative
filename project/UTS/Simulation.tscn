@@ -50,24 +50,24 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 18.75499917883428
-metadata/_belt_conveyor_owner = 1955401378009
+metadata/_belt_conveyor_owner = 1954914838651
 
 [sub_resource type="Resource" id="Resource_mjs7n"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.7571468337613805
-metadata/_belt_conveyor_owner = 1955502041309
+metadata/_belt_conveyor_owner = 1955015501951
 
 [sub_resource type="Resource" id="Resource_m21al"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.749644377257478
-metadata/_belt_conveyor_owner = 1955602704609
+metadata/_belt_conveyor_owner = 1955116165251
 
 [sub_resource type="Resource" id="Resource_g1bm1"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
-metadata/_belt_conveyor_owner = 1956626114835
+metadata/_belt_conveyor_owner = 1956139575477
 
 [node name="Simulation" type="Node3D" unique_id=1619850740]
 
@@ -83,7 +83,7 @@ segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_3fuit")])
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
-running_tag_name = "co1"
+running_tag_name = "co0"
 size = Vector3(19.255, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -94,7 +94,7 @@ segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_mjs7n")])
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
-running_tag_name = "co1"
+running_tag_name = "co0"
 size = Vector3(5.257147, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -105,7 +105,7 @@ segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_m21al")])
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
-running_tag_name = "co1"
+running_tag_name = "co0"
 size = Vector3(5.2496443, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -116,7 +116,7 @@ reverse = true
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
-running_tag_name = "co1"
+running_tag_name = "co0"
 size = Vector3(4.048, 0.5, 4.048)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -127,7 +127,7 @@ segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_g1bm1")])
 enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
-running_tag_name = "co1"
+running_tag_name = "co0"
 size = Vector3(4.5, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -151,7 +151,7 @@ metadata/hijack_scale = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.534779, 0.9979516, 6.8110127)
 enable_comms = true
 tag_group_name = "OpenPLC"
-tag_name = "co0"
+tag_name = "co1"
 metadata/_snap_transform = Callable()
 
 [node name="ColorSensor" parent="." unique_id=2040135411 instance=ExtResource("9_mjs7n")]
