@@ -50,24 +50,24 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 18.75499917883428
-metadata/_belt_conveyor_owner = 13058042848770
+metadata/_belt_conveyor_owner = 1955401378009
 
 [sub_resource type="Resource" id="Resource_mjs7n"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.7571468337613805
-metadata/_belt_conveyor_owner = 13058143511227
+metadata/_belt_conveyor_owner = 1955502041309
 
 [sub_resource type="Resource" id="Resource_m21al"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.749644377257478
-metadata/_belt_conveyor_owner = 13058244160328
+metadata/_belt_conveyor_owner = 1955602704609
 
 [sub_resource type="Resource" id="Resource_g1bm1"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
-metadata/_belt_conveyor_owner = 13059116591423
+metadata/_belt_conveyor_owner = 1956626114835
 
 [node name="Simulation" type="Node3D" unique_id=1619850740]
 
@@ -80,8 +80,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 8)
 [node name="BeltConveyor" parent="." unique_id=360974384 instance=ExtResource("4_bg1ee")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.0788383, 1.0931292, 4.967055)
 segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_3fuit")])
+enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
+running_tag_name = "co0"
 size = Vector3(19.255, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -89,8 +91,10 @@ metadata/_snap_transform = Callable()
 [node name="BeltConveyor2" parent="." unique_id=1476490323 instance=ExtResource("4_bg1ee")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 8.613957, 1.0931292, 3.9550548)
 segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_mjs7n")])
+enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
+running_tag_name = "co0"
 size = Vector3(5.257147, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -98,8 +102,10 @@ metadata/_snap_transform = Callable()
 [node name="BeltConveyor3" parent="." unique_id=1667118605 instance=ExtResource("4_bg1ee")]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 10.89428, 1.0931292, 3.9550548)
 segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_m21al")])
+enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
+running_tag_name = "co0"
 size = Vector3(5.2496443, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -107,8 +113,10 @@ metadata/_snap_transform = Callable()
 [node name="CurvedBeltConveyor" parent="." unique_id=576074511 instance=ExtResource("7_itl1f")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 12.176161, 1.0931292, 3.7050548)
 reverse = true
+enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
+running_tag_name = "co0"
 size = Vector3(4.048, 0.5, 4.048)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -116,8 +124,10 @@ metadata/_snap_transform = Callable()
 [node name="BeltConveyor4" parent="." unique_id=655624961 instance=ExtResource("4_bg1ee")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 13.438161, 1.0931292, 3.2050548)
 segments = Array[ExtResource("5_fhdai")]([SubResource("Resource_g1bm1")])
+enable_comms = true
 speed_tag_group_name = "OpenPLC"
 running_tag_group_name = "OpenPLC"
+running_tag_name = "co0"
 size = Vector3(4.5, 0.5, 1.524)
 metadata/hijack_scale = true
 metadata/_snap_transform = Callable()
@@ -141,12 +151,12 @@ metadata/hijack_scale = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.534779, 0.9979516, 6.8110127)
 enable_comms = true
 tag_group_name = "OpenPLC"
-tag_name = "co0"
+tag_name = "co10"
 metadata/_snap_transform = Callable()
 
 [node name="ColorSensor" parent="." unique_id=2040135411 instance=ExtResource("9_mjs7n")]
 transform = Transform3D(-0.17391302, 0, -1.5203959e-08, 0, 0.173913, 0, 1.5203959e-08, 0, -0.17391302, 8.036646, 1.2152065, 5.8431573)
 enable_comms = true
 tag_group_name = "OpenPLC"
-tag_name = "hr0"
+tag_name = "co1"
 metadata/_snap_transform = Callable()
