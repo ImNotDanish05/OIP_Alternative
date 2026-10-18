@@ -50,24 +50,24 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 18.75499917883428
-metadata/_belt_conveyor_owner = 1954914838651
+metadata/_belt_conveyor_owner = 1952901572729
 
 [sub_resource type="Resource" id="Resource_mjs7n"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.7571468337613805
-metadata/_belt_conveyor_owner = 1955015501951
+metadata/_belt_conveyor_owner = 1953002236029
 
 [sub_resource type="Resource" id="Resource_m21al"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.749644377257478
-metadata/_belt_conveyor_owner = 1955116165251
+metadata/_belt_conveyor_owner = 1953102899329
 
 [sub_resource type="Resource" id="Resource_g1bm1"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
-metadata/_belt_conveyor_owner = 1956139575477
+metadata/_belt_conveyor_owner = 1954126309555
 
 [node name="Simulation" type="Node3D" unique_id=1619850740]
 
@@ -159,4 +159,18 @@ transform = Transform3D(-0.17391302, 0, -1.5203959e-08, 0, 0.173913, 0, 1.520395
 enable_comms = true
 tag_group_name = "OpenPLC"
 tag_name = "hr0"
+metadata/_snap_transform = Callable()
+
+[node name="Diverter2" parent="." unique_id=485210716 instance=ExtResource("8_3fuit")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.837181, 0.9979516, 6.8110127)
+enable_comms = true
+tag_group_name = "OpenPLC"
+tag_name = "co2"
+metadata/_snap_transform = Callable()
+
+[node name="ColorSensor2" parent="." unique_id=1544307283 instance=ExtResource("9_mjs7n")]
+transform = Transform3D(-0.17391302, 0, -1.5203959e-08, 0, 0.173913, 0, 1.5203959e-08, 0, -0.17391302, 10.339048, 1.2152065, 5.8431573)
+enable_comms = true
+tag_group_name = "OpenPLC"
+tag_name = "hr1"
 metadata/_snap_transform = Callable()
