@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://5pjmdoyiub35" path="res://parts/Diverter.tscn" id="8_3fuit"]
 [ext_resource type="PackedScene" uid="uid://x7ajd6h1vd07" path="res://parts/ColorSensor.tscn" id="9_mjs7n"]
 [ext_resource type="PackedScene" uid="uid://bl73u0rvt2orv" path="res://parts/Despawner.tscn" id="10_mjs7n"]
+[ext_resource type="PackedScene" uid="uid://cacmptrsc714x" path="res://parts/Computer.tscn" id="11_m21al"]
 
 [sub_resource type="Resource" id="Resource_4bf66"]
 script = ExtResource("3_bg1ee")
@@ -184,5 +185,48 @@ tag_group_name = "OpenPLC"
 tag_name = "hr2"
 metadata/_snap_transform = Callable()
 
+[node name="ColorSensor3" parent="." unique_id=500670279 instance=ExtResource("9_mjs7n")]
+transform = Transform3D(-0.17391302, 0, -1.5203959e-08, 0, 0.173913, 0, 1.5203959e-08, 0, -0.17391302, 12.15791, 1.2152065, 5.8431573)
+enable_comms = true
+tag_group_name = "OpenPLC"
+tag_name = "hr4"
+metadata/_snap_transform = Callable()
+
 [node name="Despawner" parent="." unique_id=1495546615 instance=ExtResource("10_mjs7n")]
 transform = Transform3D(7.0998297, 0, 0, 0, 1, 0, 0, 0, 2, 11.038343, 0.3019402, -2.1330903)
+
+[node name="ComputerRed" parent="." unique_id=963156387 instance=ExtResource("11_m21al")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.532532, 1.0806264, 8.504716)
+title = "RED"
+auto_reset_on_start = true
+enable_comms = true
+trigger_tag_group_name = "OpenPLC"
+trigger_tag_name = "co3"
+count_tag_group_name = "OpenPLC"
+
+[node name="ComputerYellow" parent="." unique_id=1552748951 instance=ExtResource("11_m21al")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.641699, 1.0806264, 8.504716)
+title = "YELLOW"
+auto_reset_on_start = true
+enable_comms = true
+trigger_tag_group_name = "OpenPLC"
+trigger_tag_name = "co4"
+count_tag_group_name = "OpenPLC"
+
+[node name="ComputerGreen" parent="." unique_id=1612583681 instance=ExtResource("11_m21al")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.812347, 1.0806264, 8.504716)
+title = "GREEN"
+auto_reset_on_start = true
+enable_comms = true
+trigger_tag_group_name = "OpenPLC"
+trigger_tag_name = "co5"
+count_tag_group_name = "OpenPLC"
+
+[node name="ComputerTotal" parent="." unique_id=2119070526 instance=ExtResource("11_m21al")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.838685, 1.0806264, 8.504716)
+title = "TOTAL"
+auto_reset_on_start = true
+enable_comms = true
+trigger_tag_group_name = "OpenPLC"
+trigger_tag_name = "co6"
+count_tag_group_name = "OpenPLC"
