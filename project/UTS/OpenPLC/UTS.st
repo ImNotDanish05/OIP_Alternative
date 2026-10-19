@@ -1,19 +1,85 @@
 PROGRAM main
   VAR
-    TimerPusher : TP;
+    IS_RED : BOOL;
+    IS_YELLOW : BOOL;
+    IS_GREEN : BOOL;
+    IS_ANY_BOX : BOOL;
+    ENABLE_CONVEYOR : BOOL := TRUE;
+    ENABLE_RED : BOOL := TRUE;
+    ENABLE_YELLOW : BOOL := TRUE;
+    TP0 : TP;
+    TP1 : TP;
   END_VAR
   VAR
-    COLOR_SENSOR AT %QW1 : INT;
-    PUSHER AT %QX0.0 : BOOL;
-    DO_Conveyor AT %QX0.1 : BOOL;
+    (* Sensor Warna *)
+    COLOR_SENSOR1 AT %QW1 : INT;
+    COLOR_SENSOR2 AT %QW3 : INT;
+    COLOR_SENSOR3 AT %QW5 : INT;
+
+    (* Output Aktuator & Display *)
+    DO_Conveyor AT %QX0.0 : BOOL;
+    PUSHER1 AT %QX0.1 : BOOL;
+    PUSHER2 AT %QX0.2 : BOOL;
+    COUNT_RED AT %QX0.3 : BOOL;
+    COUNT_YELLOW AT %QX0.4 : BOOL;
+    COUNT_GREEN AT %QX0.5 : BOOL;
+    COUNT_TOTAL AT %QX0.6 : BOOL;
+
+    (* Input PushButton *)
+    PB_START AT %QX0.7 : BOOL;
+    PB_STOP_CONVEYOR AT %QX1.0 : BOOL;
+    PB_STOP_RED AT %QX1.1 : BOOL;
+    PB_STOP_YELLOW AT %QX1.2 : BOOL;
+    PB_EMERGENCY AT %QX1.3 : BOOL;
   END_VAR
 
-  (* Jalur Conveyor selalu aktif *)
-  DO_Conveyor := TRUE;
+  (* 1. Logika Tombol Kontrol *)
+  IF PB_START THEN
+    ENABLE_CONVEYOR := TRUE;
+    ENABLE_RED := TRUE;
+    ENABLE_YELLOW := TRUE;
+  END_IF;
 
-  (* Jika box berwarna merah (COLOR_SENSOR = 1), dorong box dengan mengaktifkan diverter selama 800ms *)
-  TimerPusher(IN := (COLOR_SENSOR = 1), PT := T#800ms);
-  PUSHER := TimerPusher.Q;
+  IF PB_STOP_CONVEYOR THEN
+    ENABLE_CONVEYOR := FALSE;
+  END_IF;
+
+  IF PB_STOP_RED THEN
+    ENABLE_RED := FALSE;
+  END_IF;
+
+  IF PB_STOP_YELLOW THEN
+    ENABLE_YELLOW := FALSE;
+  END_IF;
+
+  IF PB_EMERGENCY THEN
+    ENABLE_CONVEYOR := FALSE;
+    ENABLE_RED := FALSE;
+    ENABLE_YELLOW := FALSE;
+  END_IF;
+
+  (* Output Motor Conveyor *)
+  DO_Conveyor := ENABLE_CONVEYOR;
+
+  (* 2. Stasiun 1: Box Merah *)
+  IS_RED := (COLOR_SENSOR1 = 1);
+  COUNT_RED := IS_RED;
+  TP0(IN := IS_RED AND ENABLE_RED AND ENABLE_CONVEYOR, PT := T#800ms);
+  PUSHER1 := TP0.Q;
+
+  (* 3. Stasiun 2: Balok Kuning *)
+  IS_YELLOW := (COLOR_SENSOR2 = 4);
+  COUNT_YELLOW := IS_YELLOW;
+  TP1(IN := IS_YELLOW AND ENABLE_YELLOW AND ENABLE_CONVEYOR, PT := T#800ms);
+  PUSHER2 := TP1.Q;
+
+  (* 4. Stasiun 3: Box Hijau *)
+  IS_GREEN := (COLOR_SENSOR3 = 2);
+  COUNT_GREEN := IS_GREEN;
+
+  (* 5. Counter Total *)
+  IS_ANY_BOX := (COLOR_SENSOR1 > 0);
+  COUNT_TOTAL := IS_ANY_BOX;
 
 END_PROGRAM
 

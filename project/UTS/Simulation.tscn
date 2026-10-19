@@ -239,29 +239,41 @@ transform = Transform3D(3.4709892, 0, 0, 0, 2.7940693, 0, 0, 0, 1, 6.2636847, 1.
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 7.3350253, 0.90668863, 12.005411)
 text = "START"
 button_color = Color(0, 1, 0, 1)
+enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co7"
 lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButtonStopConveyor" parent="." unique_id=608540266 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 7.071605, 0.90668863, 12.005411)
 text = "STOP CONVEYOR"
+enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co8"
 lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButtonStopRedBox" parent="." unique_id=1967275881 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 6.8089, 0.90668863, 12.005411)
 text = "STOP RED BOX"
+button_color = Color(1, 0.2, 0.2, 1)
+enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co9"
 lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButtonStopYellowBox" parent="." unique_id=2045750082 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 6.553552, 0.90668863, 12.005411)
 text = "STOP YELLOW BOX"
+button_color = Color(1, 0.85, 0, 1)
+enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co10"
 lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButtonEmergencyStop" parent="." unique_id=1477361434 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 7.3350253, 0.6701392, 12.005411)
 text = "EMERGENCY"
+enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
+pushbutton_tag_name = "co11"
 lamp_tag_group_name = "OpenPLC"
