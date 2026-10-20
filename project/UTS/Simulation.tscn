@@ -53,24 +53,24 @@ metadata/_custom_type_script = "uid://1it35d0vq4ou"
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 18.75499917883428
-metadata/_belt_conveyor_owner = 1958974924990
+metadata/_belt_conveyor_owner = 4745150409205
 
 [sub_resource type="Resource" id="Resource_7meri"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.7571468337613805
-metadata/_belt_conveyor_owner = 1959075588290
+metadata/_belt_conveyor_owner = 4745251072504
 
 [sub_resource type="Resource" id="Resource_db6b7"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
 length = 4.749644377257478
-metadata/_belt_conveyor_owner = 1959176251590
+metadata/_belt_conveyor_owner = 4745351735799
 
 [sub_resource type="Resource" id="Resource_biuiu"]
 resource_local_to_scene = true
 script = ExtResource("5_fhdai")
-metadata/_belt_conveyor_owner = 1960199661816
+metadata/_belt_conveyor_owner = 4746375146026
 
 [node name="Simulation" type="Node3D" unique_id=1619850740]
 
@@ -264,6 +264,7 @@ lamp_tag_group_name = "OpenPLC"
 [node name="PushButtonStopYellowBox" parent="." unique_id=2045750082 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 6.894394, 0.6808971, 12.005411)
 text = "STOP YELLOW BOX"
+button_color = Color(1, 1, 0, 1)
 enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
 pushbutton_tag_name = "co10"
@@ -271,17 +272,18 @@ lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButtonStopGreenBox" parent="." unique_id=616894225 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 6.6316886, 0.6808971, 12.005411)
-text = "STOP RED BOX"
-button_color = Color(1, 0.2, 0.2, 1)
+text = "STOP GREEN BOX"
+button_color = Color(0.2, 0.8, 0.2, 1)
 enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
-pushbutton_tag_name = "co9"
+pushbutton_tag_name = "co11"
 lamp_tag_group_name = "OpenPLC"
 
 [node name="PushButtonEmergencyStop" parent="." unique_id=1477361434 instance=ExtResource("12_g1bm1")]
 transform = Transform3D(-0.423729, 0, -3.7043566e-08, 0, 0.423729, 0, 3.7043566e-08, 0, -0.423729, 7.3350253, 0.6701392, 12.005411)
 text = "EMERGENCY"
+button_color = Color(0.9, 0.1, 0.1, 1)
 enable_comms = true
 pushbutton_tag_group_name = "OpenPLC"
-pushbutton_tag_name = "co11"
+pushbutton_tag_name = "co12"
 lamp_tag_group_name = "OpenPLC"
