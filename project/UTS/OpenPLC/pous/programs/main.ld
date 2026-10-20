@@ -253,7 +253,7 @@ PROGRAM main
             "numericId": "5688199",
             "variable": {
               "id": "",
-              "name": "PB_EMERGENCY",
+              "name": "PB_START",
               "type": {
                 "definition": "base-type",
                 "value": "BOOL"
